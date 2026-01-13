@@ -64,6 +64,7 @@ async function getPlans(): Promise<PricingPlan[]> {
     }
 
     const apiPlans: ApiPlan[] = json.data;
+    console.log({ apiPlans });
     return apiPlans
       .map((plan) => {
         const isFree = plan.name.toUpperCase().includes("FREE");
@@ -72,9 +73,14 @@ async function getPlans(): Promise<PricingPlan[]> {
           ? "For personal use only with limited features and support"
           : "For teams and organizations with advanced features and support";
 
-        const action = isFree
-          ? "No Need to Sign in for Free"
-          : "Sign in to Purchase";
+        // Convert to Title Case (e.g., "BASIC PLAN" -> "Basic Plan")
+        const displayName = plan.name
+          .toLowerCase()
+          .split(" ")
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(" ");
+
+        const action = isFree ? "No Need to Sign in for Free" : "Get Started";
 
         let priceDisplay = "";
         if (isFree) {
@@ -97,7 +103,7 @@ async function getPlans(): Promise<PricingPlan[]> {
 
         return {
           id: plan.id,
-          name: isFree ? "Free" : "Pro",
+          name: displayName,
           subtitle,
           price: priceDisplay,
           action,
@@ -117,14 +123,6 @@ export default async function PricingPage() {
 
   return (
     <div className="min-h-screen overflow-x-hidden relative">
-      <div
-        className="absolute w-full h-full hidden lg:block"
-        style={{
-          backgroundImage: "url('/hero-bg-design.png')",
-          backgroundPosition: "top center",
-          backgroundRepeat: "no-repeat",
-        }}
-      />
       <div className="relative z-10">
         <Header />
         <main>

@@ -44,10 +44,10 @@ export function Header() {
       </div>
       <div className="flex items-center gap-4">
         <Link
-          href="/pricing"
+          href="/plans"
           className="text-base font-medium text-muted-foreground hidden sm:inline-block hover:text-foreground transition-colors cursor-pointer"
         >
-          Pricing
+          Plans
         </Link>
         {isLoading ? (
           <Button variant="ghost" disabled>
@@ -91,7 +91,7 @@ export function Header() {
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (
-          <Button asChild>
+          <Button asChild className="rounded-xl">
             <Link href="/login">Login/Signup</Link>
           </Button>
         )}

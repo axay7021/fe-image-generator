@@ -56,3 +56,70 @@ export async function getUserSubscription(
     };
   }
 }
+
+export interface BillingHistoryItem {
+  id: string;
+  amount: number;
+  currency: string;
+  status: string;
+  date: string;
+  invoice_pdf: string;
+}
+
+export interface BillingHistoryResponse {
+  success: boolean;
+  data: BillingHistoryItem[];
+  message?: string;
+}
+
+export async function getUserBillingHistory(
+  token: string
+): Promise<BillingHistoryResponse> {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+    const response = await fetch(`${baseUrl}/billing-history`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+      next: { revalidate: 0 },
+    });
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Get billing history exception:", error);
+    return {
+      success: false,
+      data: [],
+      message: "Failed to fetch billing history",
+    };
+  }
+}
+
+export async function cancelSubscription(
+  token: string
+): Promise<{ success: boolean; message: string }> {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+    const response = await fetch(`${baseUrl}/cancel-subscription`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true",
+      },
+    });
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Cancel subscription exception:", error);
+    return {
+      success: false,
+      message: "Failed to cancel subscription",
+    };
+  }
+}
