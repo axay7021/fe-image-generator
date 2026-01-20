@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { UploadCloud, X } from "lucide-react";
 import Image from "next/image";
-import { toast } from "sonner";
+import { toast } from "react-hot-toast";
 
 interface PhotoUploadCardProps {
   onImageSelect: (file: File | null) => void;

@@ -39,8 +39,10 @@ export async function upscaleImageAction(formData: FormData) {
       success: true,
       imageUrl: dataUrl,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Upscale Action Failed:", error);
-    throw new Error(error.message || "Failed to upscale image");
+    const errorMessage =
+      error instanceof Error ? error.message : "Failed to upscale image";
+    throw new Error(errorMessage);
   }
 }

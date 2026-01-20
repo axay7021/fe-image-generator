@@ -13,7 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useSignUp, useSignIn } from "@clerk/nextjs";
-import { toast } from "sonner";
+import { toast } from "react-hot-toast";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
@@ -39,8 +39,9 @@ export default function RegisterPage() {
         redirectUrl: "/sso-callback",
         redirectUrlComplete: "/",
       });
-    } catch (err: any) {
-      toast.error(err.errors?.[0]?.message || "Something went wrong");
+    } catch (err: unknown) {
+      const error = err as { errors?: { message: string }[] };
+      toast.error(error.errors?.[0]?.message || "Something went wrong");
     }
   };
 
@@ -60,9 +61,10 @@ export default function RegisterPage() {
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
       setVerifying(true);
       toast.success("Verification code sent to your email");
-    } catch (err: any) {
-      console.error(JSON.stringify(err, null, 2));
-      toast.error(err.errors?.[0]?.message || "Registration failed");
+    } catch (err: unknown) {
+      const error = err as { errors?: { message: string }[] };
+      console.error(JSON.stringify(error, null, 2));
+      toast.error(error.errors?.[0]?.message || "Registration failed");
     } finally {
       setIsLoading(false);
     }
@@ -86,9 +88,10 @@ export default function RegisterPage() {
         console.error(JSON.stringify(completeSignUp, null, 2));
         toast.error("Verification failed. Please try again.");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const error = err as { errors?: { message: string }[] };
       console.error(JSON.stringify(err, null, 2));
-      toast.error(err.errors?.[0]?.message || "Verification failed");
+      toast.error(error.errors?.[0]?.message || "Verification failed");
     } finally {
       setIsLoading(false);
     }

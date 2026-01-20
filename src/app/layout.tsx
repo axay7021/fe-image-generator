@@ -4,7 +4,7 @@ import "./globals.css";
 import { ReactQueryProvider } from "@/components/providers/query-provider";
 import { ClerkProvider } from "@clerk/nextjs";
 import { AuthProvider } from "@/context/auth-context";
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster } from "react-hot-toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,7 +35,7 @@ export default function RootLayout({
           <ReactQueryProvider>
             <AuthProvider>
               {children}
-              <Toaster />
+              <Toaster position="top-center" />
             </AuthProvider>
           </ReactQueryProvider>
         </body>

@@ -22,18 +22,29 @@ import { FeatureSection } from "@/components/home/FeatureSection";
 import { HowItWorks } from "@/components/home/HowItWorks";
 import { FAQSection } from "@/components/home/FAQ";
 import { Footer } from "@/components/layout/Footer";
-import { toast } from "sonner";
+import { useAuth } from "@/context/auth-context";
+import { toast } from "react-hot-toast";
 
 export default function Home() {
+  const { getToken } = useAuth();
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [selectedType, setSelectedType] =
     useState<TransformationType>("passport");
-  const [prompt, setPrompt] = useState("");
+  const [prompts, setPrompts] = useState<Record<string, string>>({});
   const [resultUrl, setResultUrl] = useState<string | null>(null);
+
+  // Helper to get/set current prompt
+  const currentPrompt = prompts[selectedType] || "";
+  const handlePromptChange = (value: string) => {
+    setPrompts((prev) => ({
+      ...prev,
+      [selectedType]: value,
+    }));
+  };
 
   // New States for LinkedIn Feature
   const [selectedStyle, setSelectedStyle] = useState<string>(
-    LINKEDIN_STYLES[0].id
+    LINKEDIN_STYLES[0].id,
   );
 
   // Advanced Passport Options State
@@ -46,21 +57,11 @@ export default function Home() {
       const formData = new FormData();
       if (selectedImage) formData.append("image", selectedImage);
 
-      // Get token from localStorage
-      if (typeof window !== "undefined") {
-        const userDataStr = localStorage.getItem("user_data");
-        if (userDataStr) {
-          try {
-            const userData = JSON.parse(userDataStr);
-            const token = userData.tokens?.access_token || userData.token;
-            if (token) {
-              formData.append("token", token);
-              console.log("Token added to formData");
-            }
-          } catch (e) {
-            console.error("Error parsing user data for token:", e);
-          }
-        }
+      // Get token from AuthContext
+      const token = await getToken();
+      if (token) {
+        formData.append("token", token);
+        console.log("Token added to formData");
       }
 
       if (selectedType === "linkedin") {
@@ -69,7 +70,7 @@ export default function Home() {
         formData.append("style", selectedStyle);
       } else {
         formData.append("type", selectedType);
-        formData.append("prompt", prompt);
+        formData.append("prompt", currentPrompt);
 
         // Passport Specific Data
         if (selectedType === "passport") {
@@ -157,8 +158,8 @@ export default function Home() {
                   <div className="block lg:hidden">
                     <TransformationOptionsPanel
                       selectedType={selectedType}
-                      prompt={prompt}
-                      onPromptChange={setPrompt}
+                      prompt={currentPrompt}
+                      onPromptChange={handlePromptChange}
                       passportMode={passportMode}
                       onPassportModeChange={setPassportMode}
                       suitColor={suitColor}
@@ -192,7 +193,7 @@ export default function Home() {
                 <div
                   className={cn(
                     "h-full border-l-0 lg:border-l border-border/50 pl-0 lg:pl-8 lg:min-h-[400px]",
-                    !showResults && "hidden lg:block"
+                    !showResults && "hidden lg:block",
                   )}
                 >
                   <AnimatePresence mode="wait">
@@ -222,8 +223,8 @@ export default function Home() {
                         >
                           <TransformationOptionsPanel
                             selectedType={selectedType}
-                            prompt={prompt}
-                            onPromptChange={setPrompt}
+                            prompt={currentPrompt}
+                            onPromptChange={handlePromptChange}
                             passportMode={passportMode}
                             onPassportModeChange={setPassportMode}
                             suitColor={suitColor}

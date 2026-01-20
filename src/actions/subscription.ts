@@ -1,28 +1,16 @@
 "use server";
 
+import { SubscriptionData, BillingHistoryItem } from "@/util/types";
+
 export interface SubscriptionResponse {
   statusCode: number;
   success: boolean;
   message: string;
-  data?: {
-    id: string;
-    status: string;
-    quota_used: number;
-    period_end: string;
-    plan: {
-      id: string;
-      name: string;
-      price_usd: number;
-      image_quota: number;
-      stripe_price_id: string;
-      is_active: boolean;
-      created_at: string;
-    };
-  };
+  data?: SubscriptionData;
 }
 
 export async function getUserSubscription(
-  token: string
+  token: string,
 ): Promise<SubscriptionResponse> {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
@@ -48,6 +36,7 @@ export async function getUserSubscription(
     const data = await response.json();
     return data;
   } catch (error) {
+    console.log(error);
     console.error("Get subscription exception:", error);
     return {
       statusCode: 500,
@@ -57,15 +46,6 @@ export async function getUserSubscription(
   }
 }
 
-export interface BillingHistoryItem {
-  id: string;
-  amount: number;
-  currency: string;
-  status: string;
-  date: string;
-  invoice_pdf: string;
-}
-
 export interface BillingHistoryResponse {
   success: boolean;
   data: BillingHistoryItem[];
@@ -73,11 +53,11 @@ export interface BillingHistoryResponse {
 }
 
 export async function getUserBillingHistory(
-  token: string
+  token: string,
 ): Promise<BillingHistoryResponse> {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
-    const response = await fetch(`${baseUrl}/billing-history`, {
+    const response = await fetch(`${baseUrl}/my-subscription-history`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -95,31 +75,6 @@ export async function getUserBillingHistory(
       success: false,
       data: [],
       message: "Failed to fetch billing history",
-    };
-  }
-}
-
-export async function cancelSubscription(
-  token: string
-): Promise<{ success: boolean; message: string }> {
-  try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
-    const response = await fetch(`${baseUrl}/cancel-subscription`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-        "ngrok-skip-browser-warning": "true",
-      },
-    });
-
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error("Cancel subscription exception:", error);
-    return {
-      success: false,
-      message: "Failed to cancel subscription",
     };
   }
 }

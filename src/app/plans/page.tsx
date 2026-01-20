@@ -1,6 +1,7 @@
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { PricingSection, PricingPlan } from "@/components/home/PricingSection";
+import { PricingSection } from "@/components/home/PricingSection";
+import { PricingPlan } from "@/util/types";
 
 export const dynamic = "force-dynamic";
 
@@ -11,6 +12,7 @@ interface ApiPlan {
   image_quota: number;
   stripe_price_id: string;
   is_active: boolean;
+  is_popular: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -80,7 +82,7 @@ async function getPlans(): Promise<PricingPlan[]> {
           .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
           .join(" ");
 
-        const action = isFree ? "No Need to Sign in for Free" : "Get Started";
+        const action = isFree ? "No Need to Sign in for Free" : "Buy Now";
 
         let priceDisplay = "";
         if (isFree) {
@@ -109,9 +111,13 @@ async function getPlans(): Promise<PricingPlan[]> {
           action,
           variant,
           features,
+          is_popular: plan.is_popular,
         };
       })
-      .sort((a, b) => (a.variant === "free" ? -1 : 1)); // Ensure Free comes first
+      .sort((a, b) => {
+        if (a.variant === b.variant) return 0;
+        return a.variant === "free" ? -1 : 1;
+      }); // Ensure Free comes first
   } catch (error) {
     console.error("Error fetching plans:", error);
     return [];

@@ -1,4 +1,3 @@
-import { Card } from "@/components/ui/card";
 import { Upload, Wand2, Download } from "lucide-react";
 import Image from "next/image";
 

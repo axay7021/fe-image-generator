@@ -156,7 +156,7 @@ export function TransformationOptionsPanel({
                     "group relative aspect-square rounded-xl overflow-hidden cursor-pointer border-2 transition-all duration-200",
                     selectedStyle === style.id
                       ? "border-[#538CE8] ring-2 ring-[#538CE8]/20"
-                      : "border-transparent hover:border-gray-200"
+                      : "border-transparent hover:border-gray-200",
                   )}
                   onClick={() => onStyleSelect?.(style.id)}
                 >

@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
 import { upscaleImageAction } from "@/actions/upscale-image";
-import { toast } from "sonner";
+import { toast } from "react-hot-toast";
 
 interface ResultsPanelProps {
   isLoading: boolean;

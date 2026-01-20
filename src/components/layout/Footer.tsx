@@ -68,7 +68,7 @@ export function Footer() {
         </div>
 
         <div className="md:text-center text-sm md:text-lg text-[#BDBDBD]">
-          © 2026 Softcolon. All Rights Reserved.
+          © {new Date().getFullYear()} Softcolon. All Rights Reserved.
         </div>
       </div>
     </footer>

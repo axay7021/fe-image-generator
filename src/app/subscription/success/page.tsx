@@ -61,7 +61,7 @@ function SuccessContent() {
 
             <Button
               variant="ghost"
-              onClick={() => router.push("/pricing")}
+              onClick={() => router.push("/plans")}
               className="w-full"
             >
               View Plans

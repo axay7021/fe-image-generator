@@ -16,9 +16,9 @@ export function FeatureSection() {
             making it great for students and job seekers who need a clean,
             career-ready photo fast. The tool improves lighting, fixes the
             background, and offers different outfits and poses so your profile
-            looks natural and trustworthy. It's easy to use, low-cost, and helps
-            your LinkedIn page stand out. If you want more styles, you can also
-            try AI Headshot Generator or AI Anime Generator.
+            looks natural and trustworthy. It&apos;s easy to use, low-cost, and
+            helps your LinkedIn page stand out. If you want more styles, you can
+            also try AI Headshot Generator or AI Anime Generator.
           </p>
         </div>
         <div className="relative max-w-[450px] max-h-[470px]">
@@ -41,9 +41,9 @@ export function FeatureSection() {
             Diverse Headshot Styles <br /> for Your Brand
           </h2>
           <p className="text-base sm:text-lg text-[#949494] leading-relaxed">
-            Whether you're going for a formal or creative look, we've got
-            options for both! Choose from various LinkedIn headshot styles that
-            convey different messages. The generated profile images vary in
+            Whether you&apos;re going for a formal or creative look, we&apos;ve
+            got options for both! Choose from various LinkedIn headshot styles
+            that convey different messages. The generated profile images vary in
             clothing, body language, posing, facial expressions, and personal
             styles. Capture authentic shots that align with your personal brand.
             Stay true to yourself, and let AI bring out your unique personality.

@@ -114,8 +114,10 @@ export async function generateImageAction(formData: FormData) {
       success: true,
       imageUrl: dataUrl,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Generate Image Action Failed:", error);
-    throw new Error(error.message || "Failed to generate image");
+    const errorMessage =
+      error instanceof Error ? error.message : "Failed to generate image";
+    throw new Error(errorMessage);
   }
 }

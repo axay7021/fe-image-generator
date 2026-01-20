@@ -13,7 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useSignIn } from "@clerk/nextjs";
-import { toast } from "sonner";
+import { toast } from "react-hot-toast";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
@@ -34,9 +34,10 @@ export default function LoginPage() {
         redirectUrl: "/sso-callback",
         redirectUrlComplete: "/",
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const error = err as { errors?: { message: string }[] };
       toast.error(
-        err.errors?.[0]?.message || "Something went wrong failed to login"
+        error.errors?.[0]?.message || "Something went wrong failed to login",
       );
     }
   };
@@ -54,7 +55,7 @@ export default function LoginPage() {
 
       // 2. Find the email code strategy
       const isEmailCodeFactor = supportedFirstFactors?.find(
-        (factor) => factor.strategy === "email_code"
+        (factor) => factor.strategy === "email_code",
       );
 
       if (isEmailCodeFactor && "emailAddressId" in isEmailCodeFactor) {
@@ -69,9 +70,10 @@ export default function LoginPage() {
       } else {
         toast.error("Email code login not supported for this account.");
       }
-    } catch (err: any) {
-      console.error(JSON.stringify(err, null, 2));
-      toast.error(err.errors?.[0]?.message || "Something went wrong");
+    } catch (err: unknown) {
+      const error = err as { errors?: { message: string }[] };
+      console.error(JSON.stringify(error, null, 2));
+      toast.error(error.errors?.[0]?.message || "Something went wrong");
     } finally {
       setIsLoading(false);
     }
@@ -96,9 +98,10 @@ export default function LoginPage() {
         console.error(JSON.stringify(result, null, 2));
         toast.error("Login failed. Please check your credentials.");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const error = err as { errors?: { message: string }[] };
       console.error(JSON.stringify(err, null, 2));
-      toast.error(err.errors?.[0]?.message || "Verification failed");
+      toast.error(error.errors?.[0]?.message || "Verification failed");
     } finally {
       setIsLoading(false);
     }
