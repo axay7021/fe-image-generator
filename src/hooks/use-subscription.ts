@@ -61,7 +61,6 @@ export function useSubscription() {
         // Fetch billing history
         setIsHistoryLoading(true);
         const historyRes = await getUserBillingHistory(token);
-        console.log(historyRes);
         if (historyRes.success) {
           setBillingHistory(historyRes.data);
         }

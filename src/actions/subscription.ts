@@ -32,11 +32,9 @@ export async function getUserSubscription(
       },
       next: { revalidate: 0 },
     });
-    console.log(response);
     const data = await response.json();
     return data;
   } catch (error) {
-    console.log(error);
     console.error("Get subscription exception:", error);
     return {
       statusCode: 500,

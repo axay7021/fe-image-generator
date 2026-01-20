@@ -54,7 +54,6 @@ async function getPlans(): Promise<PricingPlan[]> {
       },
       next: { revalidate: 0 }, // Ensure fresh data
     });
-    console.log({ res });
     if (!res.ok) {
       console.error("Failed to fetch plans:", res.statusText);
       return [];
@@ -66,7 +65,6 @@ async function getPlans(): Promise<PricingPlan[]> {
     }
 
     const apiPlans: ApiPlan[] = json.data;
-    console.log({ apiPlans });
     return apiPlans
       .map((plan) => {
         const isFree = plan.name.toUpperCase().includes("FREE");

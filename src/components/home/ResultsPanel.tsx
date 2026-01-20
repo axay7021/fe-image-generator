@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { Download, ChevronDown, Loader2, X } from "lucide-react";
+import { Download, ChevronDown, Loader2, X, Coins, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -15,6 +15,8 @@ import {
 import { useState } from "react";
 import { upscaleImageAction } from "@/actions/upscale-image";
 import { toast } from "react-hot-toast";
+import { useSubscription } from "@/hooks/use-subscription";
+import { cn } from "@/lib/utils";
 
 interface ResultsPanelProps {
   isLoading: boolean;
@@ -24,9 +26,20 @@ interface ResultsPanelProps {
 
 function DownloadDropdown({ resultUrl }: { resultUrl: string }) {
   const [isUpscaling, setIsUpscaling] = useState(false);
+  const { activePlanId } = useSubscription();
+
+  // If activePlanId is present, user has a subscription
+  const isSubscribed = !!activePlanId;
 
   const handleDownload = async (size: number | "original") => {
     if (!resultUrl) return;
+
+    if (size !== "original" && !isSubscribed) {
+      toast.error(
+        "Please upgrade to a plan to download high-resolution images.",
+      );
+      return;
+    }
 
     try {
       if (size === "original") {
@@ -69,6 +82,11 @@ function DownloadDropdown({ resultUrl }: { resultUrl: string }) {
     }
   };
 
+  const resolutions = [
+    { label: "2K", size: 2560, credits: 2 },
+    { label: "4K", size: 3840, credits: 4 },
+  ];
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -86,42 +104,47 @@ function DownloadDropdown({ resultUrl }: { resultUrl: string }) {
           <ChevronDown className="h-4 w-4 opacity-50" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
+      <DropdownMenuContent align="end" className="w-64">
         <DropdownMenuItem
           onClick={() => handleDownload("original")}
           className="justify-between"
         >
-          <span>Original</span>
-          <span className="text-xs text-muted-foreground">Max</span>
+          <div className="flex flex-col">
+            <span className="font-medium">Original</span>
+            <span className="text-xs text-muted-foreground">
+              Original quality
+            </span>
+          </div>
+          <span className="text-xs text-muted-foreground">Free</span>
         </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => handleDownload(1280)}
-          className="justify-between"
-        >
-          <span>HD</span>
-          <span className="text-xs text-muted-foreground">1280px</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => handleDownload(1920)}
-          className="justify-between"
-        >
-          <span>Full HD</span>
-          <span className="text-xs text-muted-foreground">1920px</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => handleDownload(2560)}
-          className="justify-between"
-        >
-          <span>2K</span>
-          <span className="text-xs text-muted-foreground">2560px</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => handleDownload(3840)}
-          className="justify-between"
-        >
-          <span>4K</span>
-          <span className="text-xs text-muted-foreground">3840px</span>
-        </DropdownMenuItem>
+
+        {resolutions.map((res) => (
+          <DropdownMenuItem
+            key={res.size}
+            onClick={() => handleDownload(res.size)}
+            className={cn(
+              "justify-between cursor-pointer",
+              !isSubscribed && "opacity-50 cursor-not-allowed",
+            )}
+            disabled={!isSubscribed}
+          >
+            <div className="flex flex-col">
+              <span className="font-medium flex items-center gap-2">
+                {res.label}
+                {!isSubscribed && (
+                  <Lock className="h-3 w-3 text-muted-foreground" />
+                )}
+              </span>
+              <span className="text-xs text-muted-foreground">
+                {res.size}px
+              </span>
+            </div>
+            <div className="flex items-center gap-1 text-xs font-medium text-amber-600 bg-amber-50 px-2 py-1 rounded-full">
+              <Coins className="h-3 w-3" />
+              {res.credits} Credit{res.credits > 1 ? "s" : ""}
+            </div>
+          </DropdownMenuItem>
+        ))}
       </DropdownMenuContent>
     </DropdownMenu>
   );

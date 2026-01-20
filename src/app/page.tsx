@@ -61,7 +61,6 @@ export default function Home() {
       const token = await getToken();
       if (token) {
         formData.append("token", token);
-        console.log("Token added to formData");
       }
 
       if (selectedType === "linkedin") {
@@ -85,7 +84,6 @@ export default function Home() {
       return await generateImageAction(formData);
     },
     onSuccess: (data) => {
-      console.log({ data });
       setResultUrl(data.imageUrl);
       toast.success("Image generated successfully!");
     },

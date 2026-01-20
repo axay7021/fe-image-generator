@@ -71,7 +71,6 @@ export async function generateImageAction(formData: FormData) {
       headers: headers,
       body: apiFormData,
     });
-    console.log(response);
     if (!response.ok) {
       // Try to parse error json if possible
       const contentType = response.headers.get("content-type");

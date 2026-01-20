@@ -97,7 +97,6 @@ export function PricingSection({ plans }: PricingSectionProps) {
 
     try {
       const result = await createCheckoutSession(plan.id, token);
-      console.log(result);
       if (result.success && result.data?.url) {
         // eslint-disable-next-line react-hooks/immutability
         window.location.href = result.data.url;

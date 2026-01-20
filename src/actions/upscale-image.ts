@@ -18,7 +18,6 @@ export async function upscaleImageAction(formData: FormData) {
       method: "POST",
       body: apiFormData,
     });
-    console.log({ response });
     if (!response.ok) {
       const contentType = response.headers.get("content-type");
       let errorMessage = `Upscale Failed: ${response.status} ${response.statusText}`;

@@ -10,7 +10,7 @@ export interface CheckoutResponse {
 
 export async function createCheckoutSession(
   planId: string,
-  token: string
+  token: string,
 ): Promise<CheckoutResponse> {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
@@ -27,7 +27,6 @@ export async function createCheckoutSession(
         "ngrok-skip-browser-warning": "true",
       },
     });
-    console.log({ response });
     const data = await response.json();
 
     if (response.ok && data.data?.url) {
