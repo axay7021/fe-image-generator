@@ -1,6 +1,5 @@
 "use client";
 
-// ... imports
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
@@ -21,12 +20,9 @@ import { cn } from "@/lib/utils";
 import { FeatureSection } from "@/components/home/FeatureSection";
 import { HowItWorks } from "@/components/home/HowItWorks";
 import { FAQSection } from "@/components/home/FAQ";
-import { Footer } from "@/components/layout/Footer";
-import { useAuth } from "@/context/auth-context";
 import { toast } from "react-hot-toast";
 
 export default function Home() {
-  const { getToken } = useAuth();
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [selectedType, setSelectedType] =
     useState<TransformationType>("passport");
@@ -56,12 +52,6 @@ export default function Home() {
     mutationFn: async () => {
       const formData = new FormData();
       if (selectedImage) formData.append("image", selectedImage);
-
-      // Get token from AuthContext
-      const token = await getToken();
-      if (token) {
-        formData.append("token", token);
-      }
 
       if (selectedType === "linkedin") {
         formData.append("type", "linkedin-profile"); // Backend implies this or handling logic
@@ -246,8 +236,6 @@ export default function Home() {
           <HowItWorks />
           <FAQSection />
         </main>
-
-        <Footer />
       </div>
     </div>
   );

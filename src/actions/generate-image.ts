@@ -1,5 +1,7 @@
 "use server";
 
+import { auth } from "@clerk/nextjs/server";
+
 export async function generateImageAction(formData: FormData) {
   const type = formData.get("type") as string;
   const prompt = formData.get("prompt") as string;
@@ -9,6 +11,10 @@ export async function generateImageAction(formData: FormData) {
   if (!baseUrl) {
     throw new Error("API Base URL is not configured");
   }
+
+  // Get Clerk auth token
+  const { getToken } = await auth();
+  const token = await getToken();
 
   let endpointAction = "";
   switch (type) {
@@ -57,8 +63,6 @@ export async function generateImageAction(formData: FormData) {
       if (tieColor) apiFormData.append("tie_color", tieColor);
     }
   }
-
-  const token = formData.get("token") as string;
 
   try {
     const headers: HeadersInit = {};

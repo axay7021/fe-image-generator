@@ -45,7 +45,7 @@ export function Header() {
       <div className="flex items-center gap-4">
         <Link
           href="/plans"
-          className="text-base font-medium text-muted-foreground hidden sm:inline-block hover:text-foreground transition-colors cursor-pointer"
+          className="text-base font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
         >
           Plans
         </Link>

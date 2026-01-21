@@ -1,5 +1,7 @@
 "use server";
 
+import { auth } from "@clerk/nextjs/server";
+
 export async function upscaleImageAction(formData: FormData) {
   const file = formData.get("file") as File;
   const targetWidth = formData.get("target_width") as string;
@@ -9,6 +11,10 @@ export async function upscaleImageAction(formData: FormData) {
     throw new Error("API Base URL is not configured");
   }
 
+  // Get Clerk auth token
+  const { getToken } = await auth();
+  const token = await getToken();
+
   const apiFormData = new FormData();
   apiFormData.append("file", file);
   apiFormData.append("target_width", targetWidth);
@@ -16,6 +22,9 @@ export async function upscaleImageAction(formData: FormData) {
   try {
     const response = await fetch(`${baseUrl}/upscale`, {
       method: "POST",
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
       body: apiFormData,
     });
     if (!response.ok) {

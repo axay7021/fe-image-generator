@@ -1,5 +1,4 @@
 import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 import { PricingSection } from "@/components/home/PricingSection";
 import { PricingPlan } from "@/util/types";
 
@@ -132,7 +131,6 @@ export default async function PricingPage() {
         <main>
           <PricingSection plans={plans} />
         </main>
-        <Footer />
       </div>
     </div>
   );

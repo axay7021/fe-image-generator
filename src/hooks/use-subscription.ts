@@ -9,7 +9,7 @@ import {
 import { SubscriptionData, BillingHistoryItem } from "@/util/types";
 
 export function useSubscription() {
-  const { user, getToken, isLoading: isAuthLoading } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const [subscription, setSubscription] = useState<SubscriptionData | null>(
     null,
   );
@@ -34,17 +34,11 @@ export function useSubscription() {
     }
 
     const fetchData = async () => {
-      const token = await getToken();
-      if (!token) {
-        setIsLoading(false);
-        return;
-      }
-
       setIsLoading(true);
 
       try {
         // Fetch subscription
-        const subRes = await getUserSubscription(token);
+        const subRes = await getUserSubscription();
         if (
           subRes.success &&
           subRes.data &&
@@ -60,7 +54,7 @@ export function useSubscription() {
 
         // Fetch billing history
         setIsHistoryLoading(true);
-        const historyRes = await getUserBillingHistory(token);
+        const historyRes = await getUserBillingHistory();
         if (historyRes.success) {
           setBillingHistory(historyRes.data);
         }
@@ -73,7 +67,7 @@ export function useSubscription() {
     };
 
     fetchData();
-  }, [user, getToken, isAuthLoading]);
+  }, [user, isAuthLoading]);
 
   return {
     subscription,

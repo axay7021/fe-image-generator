@@ -1,6 +1,7 @@
 "use server";
 
 import { SubscriptionData, BillingHistoryItem } from "@/util/types";
+import { auth } from "@clerk/nextjs/server";
 
 export interface SubscriptionResponse {
   statusCode: number;
@@ -9,9 +10,7 @@ export interface SubscriptionResponse {
   data?: SubscriptionData;
 }
 
-export async function getUserSubscription(
-  token: string,
-): Promise<SubscriptionResponse> {
+export async function getUserSubscription() {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
     if (!baseUrl) {
@@ -23,12 +22,15 @@ export async function getUserSubscription(
       };
     }
 
+    // Get Clerk auth token
+    const { getToken } = await auth();
+    const token = await getToken();
+
     const response = await fetch(`${baseUrl}/my-subscription`, {
       method: "GET",
       headers: {
-        Authorization: `Bearer ${token}`,
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
         "Content-Type": "application/json",
-        "ngrok-skip-browser-warning": "true",
       },
       next: { revalidate: 0 },
     });
@@ -50,17 +52,19 @@ export interface BillingHistoryResponse {
   message?: string;
 }
 
-export async function getUserBillingHistory(
-  token: string,
-): Promise<BillingHistoryResponse> {
+export async function getUserBillingHistory() {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+
+    // Get Clerk auth token
+    const { getToken } = await auth();
+    const token = await getToken();
+
     const response = await fetch(`${baseUrl}/my-subscription-history`, {
       method: "GET",
       headers: {
-        Authorization: `Bearer ${token}`,
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
         "Content-Type": "application/json",
-        "ngrok-skip-browser-warning": "true",
       },
       next: { revalidate: 0 },
     });

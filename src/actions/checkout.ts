@@ -8,9 +8,10 @@ export interface CheckoutResponse {
   message?: string;
 }
 
+import { auth } from "@clerk/nextjs/server";
+
 export async function createCheckoutSession(
   planId: string,
-  token: string,
 ): Promise<CheckoutResponse> {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
@@ -19,12 +20,14 @@ export async function createCheckoutSession(
       return { success: false, message: "Configuration error" };
     }
 
+    // Get Clerk auth token
+    const { getToken } = await auth();
+    const token = await getToken();
     const response = await fetch(`${baseUrl}/checkout/${planId}`, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${token}`,
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
         "Content-Type": "application/json",
-        "ngrok-skip-browser-warning": "true",
       },
     });
     const data = await response.json();

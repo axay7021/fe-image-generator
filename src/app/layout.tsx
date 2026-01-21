@@ -5,6 +5,7 @@ import { ReactQueryProvider } from "@/components/providers/query-provider";
 import { ClerkProvider } from "@clerk/nextjs";
 import { AuthProvider } from "@/context/auth-context";
 import { Toaster } from "react-hot-toast";
+import { Footer } from "@/components/layout/Footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,12 +31,13 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+          className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
         >
           <ReactQueryProvider>
             <AuthProvider>
-              {children}
+              <main className="flex-1">{children}</main>
               <Toaster position="top-center" />
+              <Footer />
             </AuthProvider>
           </ReactQueryProvider>
         </body>

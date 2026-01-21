@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { XCircle, ArrowRight, Home, Loader2 } from "lucide-react";
 import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 
 function CancelContent() {
   const router = useRouter();
@@ -73,8 +72,6 @@ export default function SubscriptionCancelPage() {
           <CancelContent />
         </Suspense>
       </main>
-
-      <Footer />
     </div>
   );
 }

@@ -96,7 +96,7 @@ export function PricingSection({ plans }: PricingSectionProps) {
     }
 
     try {
-      const result = await createCheckoutSession(plan.id, token);
+      const result = await createCheckoutSession(plan.id);
       if (result.success && result.data?.url) {
         // eslint-disable-next-line react-hooks/immutability
         window.location.href = result.data.url;
@@ -437,52 +437,118 @@ export function PricingSection({ plans }: PricingSectionProps) {
                   </CardHeader>
                   <CardContent>
                     {isLoadingHistory ? (
-                      <div className="flex justify-center p-8">
-                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                      <div className="space-y-4">
+                        {[1, 2, 3].map((i) => (
+                          <div
+                            key={i}
+                            className="bg-slate-50 rounded-xl p-4 flex justify-between items-center"
+                          >
+                            <div className="space-y-2">
+                              <Skeleton className="h-4 w-24 rounded" />
+                              <Skeleton className="h-4 w-32 rounded" />
+                            </div>
+                            <Skeleton className="h-6 w-16 rounded-full" />
+                          </div>
+                        ))}
                       </div>
                     ) : (
-                      <div className="rounded-2xl border overflow-hidden bg-white">
-                        <Table>
-                          <TableHeader className="bg-slate-50">
-                            <TableRow>
-                              <TableHead>Purchased Date</TableHead>
-                              <TableHead>Plan</TableHead>
-                              <TableHead>Amount</TableHead>
-                              <TableHead>Status</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {billingHistory.map((historyItem) => (
-                              <TableRow
-                                key={historyItem.id}
-                                className="hover:bg-slate-50/50 transition-colors"
-                              >
-                                <TableCell className="font-medium">
-                                  {new Date(
-                                    historyItem.period_start,
-                                  ).toLocaleDateString()}
-                                </TableCell>
-                                <TableCell>{historyItem.plan.name}</TableCell>
-                                <TableCell>
-                                  ${historyItem.plan.price_usd}
-                                </TableCell>
-                                <TableCell>
-                                  <span
-                                    className={cn(
-                                      "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize",
-                                      historyItem.status === "active"
-                                        ? "bg-green-100 text-green-700"
-                                        : "bg-yellow-100 text-yellow-800",
-                                    )}
-                                  >
-                                    {historyItem.status.replace("_", " ")}
-                                  </span>
-                                </TableCell>
+                      <>
+                        {/* Desktop Table View */}
+                        <div className="hidden md:block rounded-2xl border overflow-hidden bg-white">
+                          <Table>
+                            <TableHeader className="bg-slate-50">
+                              <TableRow>
+                                <TableHead>Purchased Date</TableHead>
+                                <TableHead>Plan</TableHead>
+                                <TableHead>Amount</TableHead>
+                                <TableHead>Status</TableHead>
                               </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </div>
+                            </TableHeader>
+                            <TableBody>
+                              {billingHistory.map((historyItem) => (
+                                <TableRow
+                                  key={historyItem.id}
+                                  className="hover:bg-slate-50/50 transition-colors"
+                                >
+                                  <TableCell className="font-medium">
+                                    {new Date(
+                                      historyItem.period_start,
+                                    ).toLocaleDateString()}
+                                  </TableCell>
+                                  <TableCell>{historyItem.plan.name}</TableCell>
+                                  <TableCell>
+                                    ${historyItem.plan.price_usd}
+                                  </TableCell>
+                                  <TableCell>
+                                    <span
+                                      className={cn(
+                                        "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize",
+                                        historyItem.status === "active"
+                                          ? "bg-green-100 text-green-700"
+                                          : "bg-yellow-100 text-yellow-800",
+                                      )}
+                                    >
+                                      {historyItem.status.replace("_", " ")}
+                                    </span>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </div>
+
+                        {/* Mobile Card View */}
+                        <div className="md:hidden space-y-4">
+                          {billingHistory.map((historyItem) => (
+                            <div
+                              key={historyItem.id}
+                              className="bg-white rounded-xl border p-4 space-y-3 shadow-sm"
+                            >
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <p className="text-sm text-muted-foreground">
+                                    Plan
+                                  </p>
+                                  <p className="font-semibold text-lg">
+                                    {historyItem.plan.name}
+                                  </p>
+                                </div>
+                                <span
+                                  className={cn(
+                                    "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize",
+                                    historyItem.status === "active"
+                                      ? "bg-green-100 text-green-700"
+                                      : "bg-yellow-100 text-yellow-800",
+                                  )}
+                                >
+                                  {historyItem.status.replace("_", " ")}
+                                </span>
+                              </div>
+
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <p className="text-sm text-muted-foreground">
+                                    Date
+                                  </p>
+                                  <p className="font-medium">
+                                    {new Date(
+                                      historyItem.period_start,
+                                    ).toLocaleDateString()}
+                                  </p>
+                                </div>
+                                <div>
+                                  <p className="text-sm text-muted-foreground">
+                                    Amount
+                                  </p>
+                                  <p className="font-medium">
+                                    ${historyItem.plan.price_usd}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </>
                     )}
                   </CardContent>
                 </Card>

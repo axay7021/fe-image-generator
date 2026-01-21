@@ -3,9 +3,9 @@ import { Instagram, Facebook, Twitter, Linkedin } from "lucide-react";
 
 export function Footer() {
   return (
-    <footer className="bg-[#333333] text-white py-12 mt-20">
+    <footer className="bg-[#333333] text-white md:py-12 py-5 md:mt-20">
       <div className="container mx-auto px-4 md:px-6 max-w-[1392px]">
-        <div className="flex flex-col md:flex-row justify-between md:items-center gap-8 border-b-3 border-[#3D3D3D] pb-8 mb-8">
+        <div className="flex flex-col md:flex-row justify-between md:items-center md:gap-8 gap-5 border-b-3 border-[#3D3D3D] md:pb-8 pb-5 md:mb-8 mb-5">
           <div className="flex items-center gap-2">
             <span className="font-bold text-xl flex items-center gap-2">
               <span className="bg-[#538CE8] p-1 rounded-sm">
@@ -28,41 +28,38 @@ export function Footer() {
           </div>
 
           <nav className="flex items-center gap-6 md:text-lg text-sm">
-            <Link href="#" className="hover:text-white transition-colors">
-              About us
-            </Link>
-            <Link href="#" className="hover:text-white transition-colors">
+            <Link
+              href="/privacy-policy"
+              className="hover:text-white transition-colors"
+            >
               Privacy Policy
             </Link>
-            <Link href="#" className="hover:text-white transition-colors">
+            <Link
+              href="/terms-of-service"
+              className="hover:text-white transition-colors"
+            >
               Terms of Service
             </Link>
           </nav>
 
           <div className="flex items-center gap-4">
             <Link
-              href="#"
+              href="https://www.instagram.com/softcolon?igsh=ZjJmODdveXU3aTdt"
               className="hover:text-[#538CE8] transition-colors bg-white p-2 rounded-full"
             >
-              <Instagram className="h-5 w-5" color="black" />
+              <Instagram className="md:h-5 md:w-5 h-4 w-4" color="black" />
             </Link>
             <Link
               href="#"
               className="hover:text-[#538CE8] transition-colors bg-white p-2 rounded-full"
             >
-              <Facebook className="h-5 w-5" color="black" />
+              <Twitter className="md:h-5 md:w-5 h-4 w-4" color="black" />
             </Link>
             <Link
-              href="#"
+              href="https://www.linkedin.com/company/softcolon/"
               className="hover:text-[#538CE8] transition-colors bg-white p-2 rounded-full"
             >
-              <Twitter className="h-5 w-5" color="black" />
-            </Link>
-            <Link
-              href="#"
-              className="hover:text-[#538CE8] transition-colors bg-white p-2 rounded-full"
-            >
-              <Linkedin className="h-5 w-5" color="black" />
+              <Linkedin className="md:h-5 md:w-5 h-4 w-4" color="black" />
             </Link>
           </div>
         </div>

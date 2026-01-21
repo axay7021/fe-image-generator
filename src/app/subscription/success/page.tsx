@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, ArrowRight, Loader2 } from "lucide-react";
 import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 
 function SuccessContent() {
   const router = useRouter();
@@ -89,8 +88,6 @@ export default function SubscriptionSuccessPage() {
           <SuccessContent />
         </Suspense>
       </main>
-
-      <Footer />
     </div>
   );
 }
