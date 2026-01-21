@@ -14,9 +14,10 @@ import {
 } from "@/components/ui/card";
 import { useSignUp, useSignIn } from "@clerk/nextjs";
 import { toast } from "react-hot-toast";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
+
+import { Loader2, ArrowLeft } from "lucide-react";
 
 export default function RegisterPage() {
   const { isLoaded, signUp, setActive } = useSignUp();
@@ -29,7 +30,24 @@ export default function RegisterPage() {
   // Password removed
   const [verifying, setVerifying] = useState(false);
   const [code, setCode] = useState("");
+  const [timeLeft, setTimeLeft] = useState(120);
+  const [canResend, setCanResend] = useState(false);
+
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (verifying && timeLeft > 0) {
+      timer = setInterval(() => {
+        setTimeLeft((prev) => prev - 1);
+      }, 1000);
+    } else if (timeLeft === 0) {
+      setCanResend(true);
+    }
+    return () => clearInterval(timer);
+  }, [verifying, timeLeft]);
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   const handleGoogleLogin = async () => {
     if (!isSignInLoaded) return;
@@ -60,6 +78,8 @@ export default function RegisterPage() {
       // Prepare for verification
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
       setVerifying(true);
+      setTimeLeft(120);
+      setCanResend(false);
       toast.success("Verification code sent to your email");
     } catch (err: unknown) {
       const error = err as { errors?: { message: string }[] };
@@ -97,10 +117,37 @@ export default function RegisterPage() {
     }
   };
 
+  const handleResend = async () => {
+    if (!isLoaded) return;
+    setIsLoading(true);
+    try {
+      await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
+      setTimeLeft(120);
+      setCanResend(false);
+      toast.success("Verification code sent again");
+    } catch (err: unknown) {
+      const error = err as { errors?: { message: string }[] };
+      toast.error(error.errors?.[0]?.message || "Failed to resend code");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   if (verifying) {
     return (
       <Card className="border-0 shadow-none">
         <CardHeader className="space-y-1">
+          <div className="flex items-center gap-2 mb-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="p-0 hover:bg-transparent -ml-2 text-muted-foreground hover:text-foreground"
+              onClick={() => setVerifying(false)}
+            >
+              <ArrowLeft className="h-4 w-4 mr-1" />
+              Back
+            </Button>
+          </div>
           <CardTitle className="md:text-4xl text-2xl font-bold tracking-tight">
             Verify your email
           </CardTitle>
@@ -112,7 +159,7 @@ export default function RegisterPage() {
           <form onSubmit={handleVerify} className="grid gap-4 md:gap-6">
             <div className="grid gap-2">
               <Label htmlFor="code" className="text-base md:text-lg">
-                Verification Code
+                Verification Code <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="code"
@@ -126,13 +173,26 @@ export default function RegisterPage() {
               <Button
                 className="w-full text-base md:text-lg md:p-6 p-4 rounded-lg"
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading || !code}
               >
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Verify Email
               </Button>
             </div>
           </form>
+          <div className="text-center">
+            <Button
+              variant="link"
+              className="text-sm text-muted-foreground hover:text-primary p-0"
+              onClick={handleResend}
+              type="button"
+              disabled={isLoading || !canResend}
+            >
+              Resend Code{" "}
+              {timeLeft > 0 &&
+                `in (${Math.floor(timeLeft / 60)}:${(timeLeft % 60).toString().padStart(2, "0")})`}
+            </Button>
+          </div>
         </CardContent>
       </Card>
     );
@@ -153,7 +213,7 @@ export default function RegisterPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
               <Label htmlFor="firstName" className="text-base md:text-lg">
-                First Name
+                First Name <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="firstName"
@@ -166,7 +226,7 @@ export default function RegisterPage() {
             </div>
             <div className="grid gap-2">
               <Label htmlFor="lastName" className="text-base md:text-lg">
-                Last Name
+                Last Name <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="lastName"
@@ -180,7 +240,7 @@ export default function RegisterPage() {
           </div>
           <div className="grid gap-2">
             <Label htmlFor="email" className="text-base md:text-lg">
-              Email
+              Email <span className="text-red-500">*</span>
             </Label>
             <Input
               id="email"
@@ -196,7 +256,13 @@ export default function RegisterPage() {
             <Button
               className="w-full text-base md:text-lg md:p-6 p-4 rounded-lg"
               type="submit"
-              disabled={isLoading}
+              disabled={
+                isLoading ||
+                !firstName ||
+                !lastName ||
+                !email ||
+                !emailRegex.test(email)
+              }
             >
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Create Account

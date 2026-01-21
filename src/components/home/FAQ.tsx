@@ -31,11 +31,9 @@ const faqs = [
 
 export function FAQSection() {
   return (
-    <section className="py-24 max-w-3xl mx-auto">
+    <section id="faq" className="py-24 max-w-3xl mx-auto">
       <div className="text-center mb-12">
-        <h2 className="text-3xl md:text-4xl font-bold text-[#538CE8]">
-          FAQs About
-        </h2>
+        <h2 className="text-3xl md:text-4xl font-bold text-[#538CE8]">FAQs</h2>
       </div>
 
       <Accordion type="single" collapsible className="w-full space-y-4">

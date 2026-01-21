@@ -27,7 +27,7 @@ const steps = [
 
 export function HowItWorks() {
   return (
-    <section className="py-16">
+    <section id="how-it-works" className="py-16">
       <div className="text-center mb-16 space-y-4">
         <h2 className="text-2xl md:text-4xl font-bold text-[#538CE8]">
           How to Use AI Headshot Generator for <br /> LinkedIn Profile Picture

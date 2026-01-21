@@ -20,7 +20,7 @@ export function PhotoUploadCard({
   const [preview, setPreview] = useState<string | null>(null);
 
   const onDrop = useCallback(
-    (acceptedFiles: File[]) => {
+    async (acceptedFiles: File[]) => {
       if (acceptedFiles && acceptedFiles.length > 0) {
         const file = acceptedFiles[0];
 
@@ -31,16 +31,44 @@ export function PhotoUploadCard({
           file.type === "image/heif"
         ) {
           toast.error(
-            "HEIC format is not supported. Please use PNG, JPG, or WebP."
+            "HEIC format is not supported. Please use PNG, JPG, or WebP.",
           );
           return;
         }
 
-        onImageSelect(file);
-        setPreview(URL.createObjectURL(file));
+        const validToastId = toast.loading("Validating image...");
+
+        try {
+          const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+          if (!baseUrl) {
+            console.error("NEXT_PUBLIC_BASE_URL is not set");
+            return { success: false, message: "Configuration error" };
+          }
+          const formData = new FormData();
+          formData.append("file", file);
+
+          const response = await fetch(`${baseUrl}/validate-image`, {
+            method: "POST",
+            body: formData,
+          });
+
+          const data = await response.json();
+
+          if (data.valid) {
+            toast.dismiss(validToastId);
+            // toast.success("Image validated!", { id: validToastId });
+            onImageSelect(file);
+            setPreview(URL.createObjectURL(file));
+          } else {
+            toast.error(data.message || "Invalid image", { id: validToastId });
+          }
+        } catch (error) {
+          console.error(error);
+          toast.error("Validation failed", { id: validToastId });
+        }
       }
     },
-    [onImageSelect]
+    [onImageSelect],
   );
 
   const clearImage = (e: React.MouseEvent) => {
@@ -78,7 +106,7 @@ export function PhotoUploadCard({
           : "border-muted-foreground/25",
         selectedImage
           ? "border-solid border-border p-0"
-          : "hover:border-primary/50"
+          : "hover:border-primary/50",
       )}
     >
       <CardContent className="p-0">
@@ -86,7 +114,7 @@ export function PhotoUploadCard({
           {...getRootProps()}
           className={cn(
             "flex flex-col items-center justify-center min-h-[220px] cursor-pointer p-4 text-center transition-colors",
-            selectedImage ? "cursor-default" : ""
+            selectedImage ? "cursor-default" : "",
           )}
         >
           <input {...getInputProps()} />

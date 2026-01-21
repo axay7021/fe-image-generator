@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { generateImageAction } from "@/actions/generate-image";
@@ -97,6 +97,18 @@ export default function Home() {
 
   const showResults = !!resultUrl || isPending;
 
+  // Scroll to results on mobile when generation starts
+  useEffect(() => {
+    if (showResults && window.innerWidth < 1024) {
+      setTimeout(() => {
+        const resultsElement = document.getElementById("results-section");
+        if (resultsElement) {
+          resultsElement.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 100);
+    }
+  }, [showResults]);
+
   return (
     <div className="min-h-screen overflow-x-hidden relative">
       {/* Hero Background - targeted to top section */}
@@ -179,6 +191,7 @@ export default function Home() {
 
                 {/* Right Column: Options or Results */}
                 <div
+                  id="results-section"
                   className={cn(
                     "h-full border-l-0 lg:border-l border-border/50 pl-0 lg:pl-8 lg:min-h-[400px]",
                     !showResults && "hidden lg:block",

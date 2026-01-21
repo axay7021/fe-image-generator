@@ -49,12 +49,12 @@ export function Footer() {
             >
               <Instagram className="md:h-5 md:w-5 h-4 w-4" color="black" />
             </Link>
-            <Link
+            {/* <Link
               href="#"
               className="hover:text-[#538CE8] transition-colors bg-white p-2 rounded-full"
             >
               <Twitter className="md:h-5 md:w-5 h-4 w-4" color="black" />
-            </Link>
+            </Link> */}
             <Link
               href="https://www.linkedin.com/company/softcolon/"
               className="hover:text-[#538CE8] transition-colors bg-white p-2 rounded-full"
