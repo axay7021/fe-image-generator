@@ -40,6 +40,7 @@ export function PhotoUploadCard({
 
         try {
           const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+          console.log(baseUrl);
           if (!baseUrl) {
             console.error("NEXT_PUBLIC_BASE_URL is not set");
             return { success: false, message: "Configuration error" };
