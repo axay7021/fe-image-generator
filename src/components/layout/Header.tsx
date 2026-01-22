@@ -14,14 +14,25 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { LogOut, Loader2, Menu, X } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 export function Header() {
   const { isSignedIn } = useUser();
   const { user, logout, isLoading } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 0);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -38,7 +49,14 @@ export function Header() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 w-full">
+    <header
+      className={cn(
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
+        isScrolled
+          ? "bg-white/70 backdrop-blur-lg shadow-sm border-b border-white/20 supports-backdrop-filter:bg-white/60"
+          : "bg-transparent py-5",
+      )}
+    >
       <div className="container px-4 md:px-6 mx-auto max-w-[1392px] flex h-16 items-center justify-between">
         <div className="flex items-center gap-2">
           <Link href="/" className="flex items-center gap-2">

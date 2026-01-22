@@ -27,7 +27,6 @@ export default function RegisterPage() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
-  // Password removed
   const [verifying, setVerifying] = useState(false);
   const [code, setCode] = useState("");
   const [timeLeft, setTimeLeft] = useState(120);
@@ -258,8 +257,8 @@ export default function RegisterPage() {
               type="submit"
               disabled={
                 isLoading ||
-                !firstName ||
-                !lastName ||
+                firstName.length < 3 ||
+                lastName.length < 3 ||
                 !email ||
                 !emailRegex.test(email)
               }

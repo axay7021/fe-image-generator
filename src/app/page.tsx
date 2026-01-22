@@ -125,7 +125,7 @@ export default function Home() {
       <div className="relative z-10">
         <Header />
 
-        <main className="container px-4 md:px-6 py-5 mx-auto max-w-[1392px]">
+        <main className="container px-4 md:px-6 py-5 mx-auto max-w-[1392px] mt-20">
           <div className="flex flex-col items-center justify-center space-y-4 text-center mb-10">
             <h1 className="text-3xl md:text-[40px] font-bold tracking-tight bg-clip-text text-transparent bg-[#538CE8]">
               Free AI Photo Generator
