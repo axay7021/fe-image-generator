@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { UploadCloud, X } from "lucide-react";
 import Image from "next/image";
 import { toast } from "react-hot-toast";
+import { validateImage } from "@/app/actions/image";
 
 interface PhotoUploadCardProps {
   onImageSelect: (file: File | null) => void;
@@ -39,25 +40,13 @@ export function PhotoUploadCard({
         const validToastId = toast.loading("Validating image...");
 
         try {
-          const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
-          console.log(baseUrl);
-          if (!baseUrl) {
-            console.error("NEXT_PUBLIC_BASE_URL is not set");
-            return { success: false, message: "Configuration error" };
-          }
           const formData = new FormData();
           formData.append("file", file);
 
-          const response = await fetch(`${baseUrl}/validate-image`, {
-            method: "POST",
-            body: formData,
-          });
-
-          const data = await response.json();
+          const data = await validateImage(formData);
 
           if (data.valid) {
             toast.dismiss(validToastId);
-            // toast.success("Image validated!", { id: validToastId });
             onImageSelect(file);
             setPreview(URL.createObjectURL(file));
           } else {
