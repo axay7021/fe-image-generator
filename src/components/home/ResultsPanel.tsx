@@ -156,7 +156,7 @@ export function ResultsPanel({
   onClose,
 }: ResultsPanelProps) {
   return (
-    <Card className="h-full min-h-[400px] border-border relative overflow-hidden flex flex-col items-center justify-center p-6 bg-muted/20">
+    <Card className="h-full min-h-[500px] border-border relative overflow-hidden flex flex-col items-center justify-center p-6 bg-muted/20">
       {isLoading ? (
         <div className="w-full h-full flex flex-col items-center justify-center gap-4">
           <Skeleton className="w-full h-[80%] rounded-xl" />

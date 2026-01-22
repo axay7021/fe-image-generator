@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { UserButton, useUser } from "@clerk/nextjs";
 import { useAuth } from "@/context/auth-context";
@@ -24,15 +25,44 @@ export function Header() {
   const { user, logout, isLoading } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const pathname = usePathname();
+  const [activeHash, setActiveHash] = useState("");
 
   useEffect(() => {
+    // Initial hash check
+    setActiveHash(window.location.hash);
+
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 0);
     };
 
+    // Hash change listener not native in React for same-page hash, so we click-detect or poll?
+    // Actually, popstate handles hash changes from back/forward.
+    const handleHashChange = () => {
+      setActiveHash(window.location.hash);
+    };
+
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    window.addEventListener("popstate", handleHashChange); // For back/forward
+    // For manual clicks, we update state in the click handler too.
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("popstate", handleHashChange);
+    };
   }, []);
+
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isMobileMenuOpen]);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -82,15 +112,51 @@ export function Header() {
 
         {/* Desktop Navigation - Centered */}
         <nav className="hidden md:flex items-center gap-8 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-          {navLinks.map((link) => (
-            <Link
-              key={link.name}
-              href={link.href}
-              className="text-base font-medium text-muted-foreground hover:text-primary hover:underline transition-colors cursor-pointer"
-            >
-              {link.name}
-            </Link>
-          ))}
+          {navLinks.map((link) => {
+            const isActive =
+              link.href === pathname + activeHash ||
+              (link.href === "/#how-it-works" &&
+                pathname === "/" &&
+                activeHash === "#how-it-works") ||
+              (link.href === "/#faq" &&
+                pathname === "/" &&
+                activeHash === "#faq");
+
+            // Special case: if no hash and at home, maybe highlight nothing or 'How to use' if scrolled?
+            // User asked "when visit that". So if I click Plans, Plans is active.
+            // If I click How To Use, How To Use is active.
+
+            return (
+              <Link
+                key={link.name}
+                href={link.href}
+                onClick={() =>
+                  setActiveHash(
+                    link.href.split("#")[1]
+                      ? "#" + link.href.split("#")[1]
+                      : "",
+                  )
+                }
+                className={cn(
+                  "text-base font-medium transition-colors cursor-pointer relative py-1",
+                  isActive
+                    ? "text-primary"
+                    : "text-muted-foreground hover:text-primary",
+                )}
+              >
+                {link.name}
+                {isActive && (
+                  <motion.div
+                    layoutId="active-nav-underline"
+                    className="absolute left-0 right-0 bottom-0 h-0.5 bg-primary rounded-full"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                  />
+                )}
+              </Link>
+            );
+          })}
         </nav>
 
         <div className="flex items-center gap-4">
@@ -170,7 +236,7 @@ export function Header() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="fixed inset-0 z-40 bg-black/50 md:hidden"
+              className="fixed inset-0 z-40 bg-black/50 md:hidden h-[100dvh]"
               onClick={closeMobileMenu}
             />
 
@@ -180,7 +246,7 @@ export function Header() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="fixed top-0 right-0 z-50 h-full w-[300px] bg-background p-6 shadow-2xl flex flex-col md:hidden"
+              className="fixed top-0 right-0 z-50 h-[100dvh] w-[300px] bg-background p-6 shadow-2xl flex flex-col md:hidden"
             >
               <div className="flex items-center justify-between mb-8">
                 <span className="text-xl font-bold tracking-tight">Menu</span>

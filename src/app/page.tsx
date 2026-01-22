@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { generateImageAction } from "@/actions/generate-image";
@@ -11,6 +12,7 @@ import {
   TransformationType,
   PassportMode,
   LINKEDIN_STYLES,
+  BACKGROUND_CATEGORIES,
 } from "@/components/home/TransformationSelector";
 import { TransformationOptionsPanel } from "@/components/home/TransformationOptionsPanel";
 import { ResultsPanel } from "@/components/home/ResultsPanel";
@@ -23,6 +25,7 @@ import { FAQSection } from "@/components/home/FAQ";
 import { toast } from "react-hot-toast";
 
 export default function Home() {
+  const router = useRouter();
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [selectedType, setSelectedType] =
     useState<TransformationType>("passport");
@@ -47,6 +50,9 @@ export default function Home() {
   const [passportMode, setPassportMode] = useState<PassportMode>("standard");
   const [suitColor, setSuitColor] = useState("Navy Blue");
   const [tieColor, setTieColor] = useState("Red");
+  const [bgCategory, setBgCategory] = useState<string>(
+    BACKGROUND_CATEGORIES[0].id,
+  );
 
   const { mutate, isPending } = useMutation({
     mutationFn: async () => {
@@ -57,6 +63,12 @@ export default function Home() {
         formData.append("type", "linkedin-profile"); // Backend implies this or handling logic
         formData.append("action", "linkedin-profile"); // Just to be safe based on request
         formData.append("style", selectedStyle);
+      } else if (selectedType === "background") {
+        formData.append("type", "background");
+        formData.append("category", bgCategory);
+        if (bgCategory === "custom") {
+          formData.append("prompt", currentPrompt);
+        }
       } else {
         formData.append("type", selectedType);
         formData.append("prompt", currentPrompt);
@@ -79,6 +91,11 @@ export default function Home() {
     },
     onError: (error) => {
       console.log(error);
+      if (error.message.includes("Daily limit reached")) {
+        // toast.error("Daily limit reached. Redirecting to login...");
+        router.push("/login");
+        return;
+      }
       toast.error(`Generation failed: ${error.message}`);
     },
   });
@@ -168,6 +185,8 @@ export default function Home() {
                       onTieColorChange={setTieColor}
                       selectedStyle={selectedStyle}
                       onStyleSelect={setSelectedStyle}
+                      bgCategory={bgCategory}
+                      onBgCategoryChange={setBgCategory}
                     />
                   </div>
 
@@ -234,6 +253,8 @@ export default function Home() {
                             onTieColorChange={setTieColor}
                             selectedStyle={selectedStyle}
                             onStyleSelect={setSelectedStyle}
+                            bgCategory={bgCategory}
+                            onBgCategoryChange={setBgCategory}
                           />
                         </motion.div>
                       </div>

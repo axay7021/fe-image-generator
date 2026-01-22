@@ -38,6 +38,33 @@ export const LINKEDIN_STYLES = [
   { id: "tech_modern", label: "Tech / Modern", img: "/linkedin/9.png" },
 ];
 
+export const BACKGROUND_CATEGORIES = [
+  { id: "white", label: "White", color: "#FFFFFF" },
+  { id: "black", label: "Black", color: "#000000" },
+  { id: "grey", label: "Grey", color: "#808080" },
+  { id: "warm_grey", label: "Warm Grey", color: "#A9A9A9" },
+  { id: "cool_grey", label: "Cool Grey", color: "#708090" },
+  { id: "blue", label: "Blue", color: "#0000FF" },
+  {
+    id: "gradient_blue",
+    label: "Gradient Blue",
+    color: "linear-gradient(to right, #00c6ff, #0072ff)",
+  },
+  {
+    id: "gradient_grey",
+    label: "Gradient Grey",
+    color: "linear-gradient(to right, #bdc3c7, #2c3e50)",
+  },
+  { id: "office", label: "Office", color: "#F5F5DC" }, // Placeholder color
+  { id: "plain", label: "Plain", color: "#E0E0E0" },
+  { id: "studio", label: "Studio", color: "#333333" },
+  {
+    id: "custom",
+    label: "Custom",
+    color: "linear-gradient(45deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%)",
+  },
+];
+
 interface TransformationSelectorProps {
   selectedType: TransformationType;
   onSelect: (type: TransformationType) => void;
@@ -109,7 +136,7 @@ export function TransformationSelector({
                     "flex items-center gap-4 p-3 rounded-xl border-2 transition-all cursor-pointer hover:bg-accent/50",
                     isSelected
                       ? "border-primary bg-primary/5 ring-1 ring-primary/20"
-                      : "border-border bg-card"
+                      : "border-border bg-card",
                   )}
                 >
                   <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-muted">

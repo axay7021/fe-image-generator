@@ -51,6 +51,12 @@ export async function generateImageAction(formData: FormData) {
     if (style) apiFormData.append("style", style);
   }
 
+  // Handle Background Change
+  if (type === "background") {
+    const category = formData.get("category") as string;
+    if (category) apiFormData.append("category", category);
+  }
+
   // Handle Passport Specifics
   if (type === "passport") {
     const passportMode = formData.get("passport_mode") as string;

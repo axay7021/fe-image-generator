@@ -10,6 +10,7 @@ import {
   TransformationType,
   PassportMode,
   LINKEDIN_STYLES,
+  BACKGROUND_CATEGORIES,
 } from "./TransformationSelector";
 
 interface TransformationOptionsPanelProps {
@@ -24,6 +25,8 @@ interface TransformationOptionsPanelProps {
   onTieColorChange: (color: string) => void;
   selectedStyle?: string;
   onStyleSelect?: (style: string) => void;
+  bgCategory?: string;
+  onBgCategoryChange?: (category: string) => void;
 }
 
 export function TransformationOptionsPanel({
@@ -38,6 +41,8 @@ export function TransformationOptionsPanel({
   onTieColorChange,
   selectedStyle,
   onStyleSelect,
+  bgCategory,
+  onBgCategoryChange,
 }: TransformationOptionsPanelProps) {
   return (
     <div className="h-full">
@@ -131,8 +136,13 @@ export function TransformationOptionsPanel({
                     placeholder="e.g. wearing a tuxedo"
                     className="resize-none h-24"
                     value={prompt}
-                    onChange={(e) => onPromptChange(e.target.value)}
+                    onChange={(e) =>
+                      onPromptChange(e.target.value.slice(0, 500))
+                    }
                   />
+                  <div className="text-right text-xs text-muted-foreground">
+                    {prompt.length}/500
+                  </div>
                 </div>
               )}
             </div>
@@ -192,8 +202,11 @@ export function TransformationOptionsPanel({
                 placeholder="Describe your desired image..."
                 className="resize-none h-32 focus-visible:ring-0 focus-visible:ring-offset-0"
                 value={prompt}
-                onChange={(e) => onPromptChange(e.target.value)}
+                onChange={(e) => onPromptChange(e.target.value.slice(0, 500))}
               />
+              <div className="text-right text-xs text-muted-foreground">
+                {prompt.length}/500
+              </div>
             </div>
           </motion.div>
         )}
@@ -211,24 +224,72 @@ export function TransformationOptionsPanel({
                 ? "Background Settings"
                 : "Removal Settings"}
             </h3>
-            <div className="space-y-2">
-              <Label htmlFor="context-input">
-                {selectedType === "background"
-                  ? "Background Description"
-                  : "Object to Remove"}
-              </Label>
-              <Textarea
-                id="context-input"
-                placeholder={
-                  selectedType === "background"
-                    ? "e.g. a sunny tropical beach"
-                    : "e.g. the red car"
-                }
-                className="resize-none h-24 focus-visible:ring-0 focus-visible:ring-offset-0"
-                value={prompt}
-                onChange={(e) => onPromptChange(e.target.value)}
-              />
-            </div>
+
+            {selectedType === "background" ? (
+              <div className="space-y-4">
+                <Label>Select Background Style</Label>
+                <div className="grid grid-cols-4 gap-2">
+                  {BACKGROUND_CATEGORIES.map((cat) => (
+                    <div
+                      key={cat.id}
+                      className={cn(
+                        "group relative aspect-square rounded-lg cursor-pointer border overflow-hidden transition-all",
+                        bgCategory === cat.id
+                          ? "border-primary ring-2 ring-primary/20"
+                          : "border-border hover:border-gray-300",
+                      )}
+                      onClick={() => onBgCategoryChange?.(cat.id)}
+                      title={cat.label}
+                    >
+                      <div
+                        className="w-full h-full"
+                        style={{ background: cat.color }}
+                      />
+                      {cat.id === "custom" && (
+                        <div className="absolute inset-0 flex items-center justify-center p-1">
+                          <span className="text-[10px] sm:text-base font-medium text-white drop-shadow-md leading-tight text-center">
+                            Custom
+                          </span>
+                        </div>
+                      )}
+                      {bgCategory === cat.id && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                          <div className="w-2 h-2 bg-white rounded-full shadow-sm" />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                {bgCategory === "custom" && (
+                  <div className="space-y-2 animate-in fade-in slide-in-from-top-1">
+                    <Label htmlFor="bg-prompt">
+                      Custom Background Description
+                    </Label>
+                    <Textarea
+                      id="bg-prompt"
+                      placeholder="e.g. a futuristic cyberpunk city street"
+                      className="resize-none h-24"
+                      value={prompt}
+                      onChange={(e) => onPromptChange(e.target.value)}
+                    />
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Label htmlFor="remove-input">Object to Remove</Label>
+                <Textarea
+                  id="remove-input"
+                  placeholder="e.g. the red car"
+                  className="resize-none h-24 focus-visible:ring-0 focus-visible:ring-offset-0"
+                  value={prompt}
+                  onChange={(e) => onPromptChange(e.target.value.slice(0, 500))}
+                />
+                <div className="text-right text-xs text-muted-foreground">
+                  {prompt.length}/500
+                </div>
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
