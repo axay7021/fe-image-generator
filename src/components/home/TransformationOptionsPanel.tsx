@@ -202,10 +202,10 @@ export function TransformationOptionsPanel({
                 placeholder="Describe your desired image..."
                 className="resize-none h-32 focus-visible:ring-0 focus-visible:ring-offset-0"
                 value={prompt}
-                onChange={(e) => onPromptChange(e.target.value.slice(0, 500))}
+                onChange={(e) => onPromptChange(e.target.value.slice(0, 2000))}
               />
               <div className="text-right text-xs text-muted-foreground">
-                {prompt.length}/500
+                {prompt.length}/2000
               </div>
             </div>
           </motion.div>
