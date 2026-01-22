@@ -30,14 +30,14 @@ export function Header() {
 
   useEffect(() => {
     // Initial hash check
-    setActiveHash(window.location.hash);
+    const timer = setTimeout(() => {
+      setActiveHash(window.location.hash);
+    }, 0);
 
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 0);
     };
 
-    // Hash change listener not native in React for same-page hash, so we click-detect or poll?
-    // Actually, popstate handles hash changes from back/forward.
     const handleHashChange = () => {
       setActiveHash(window.location.hash);
     };
@@ -47,6 +47,7 @@ export function Header() {
     // For manual clicks, we update state in the click handler too.
 
     return () => {
+      clearTimeout(timer);
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("popstate", handleHashChange);
     };
