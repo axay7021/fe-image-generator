@@ -6,7 +6,7 @@ export default function TermsOfServicePage() {
   return (
     <>
       <Header />
-      <div className="container mx-auto px-4 py-6 max-w-4xl text-foreground">
+      <div className="container mx-auto px-4 py-6 max-w-4xl text-foreground mt-20">
         {/* <Link
           href="/"
           className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 transition-colors"
