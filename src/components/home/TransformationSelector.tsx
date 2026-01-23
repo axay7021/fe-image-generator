@@ -44,7 +44,7 @@ export const BACKGROUND_CATEGORIES = [
   { id: "grey", label: "Grey", color: "#808080" },
   { id: "warm_grey", label: "Warm Grey", color: "#A9A9A9" },
   { id: "cool_grey", label: "Cool Grey", color: "#708090" },
-  { id: "blue", label: "Blue", color: "#0000FF" },
+  { id: "blue", label: "Blue", color: "#2d4d74" },
   {
     id: "gradient_blue",
     label: "Gradient Blue",
