@@ -108,9 +108,16 @@ export async function generateImageAction(formData: FormData) {
       }
 
       if (response.status === 429) {
-        errorMessage = "Daily limit reached. Please try again tomorrow.";
+        return {
+          success: false,
+          error: "Daily limit reached. Please try again tomorrow.",
+        };
       }
-      throw new Error(errorMessage);
+
+      return {
+        success: false,
+        error: errorMessage,
+      };
     }
 
     const arrayBuffer = await response.arrayBuffer();
@@ -127,6 +134,9 @@ export async function generateImageAction(formData: FormData) {
     console.error("Generate Image Action Failed:", error);
     const errorMessage =
       error instanceof Error ? error.message : "Failed to generate image";
-    throw new Error(errorMessage);
+    return {
+      success: false,
+      error: errorMessage,
+    };
   }
 }

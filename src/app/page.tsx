@@ -86,16 +86,20 @@ export default function Home() {
       return await generateImageAction(formData);
     },
     onSuccess: (data) => {
-      setResultUrl(data.imageUrl);
+      if (!data.success) {
+        if (data.error?.includes("Daily limit reached")) {
+          router.push("/login");
+          return;
+        }
+        toast.error(`Generation failed: ${data.error}`);
+        return;
+      }
+
+      setResultUrl(data.imageUrl!);
       toast.success("Image generated successfully!");
     },
     onError: (error) => {
       console.log(error);
-      if (error.message.includes("Daily limit reached")) {
-        // toast.error("Daily limit reached. Redirecting to login...");
-        router.push("/login");
-        return;
-      }
       toast.error(`Generation failed: ${error.message}`);
     },
   });
