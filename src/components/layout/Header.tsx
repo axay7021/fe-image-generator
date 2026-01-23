@@ -19,6 +19,7 @@ import { useState, useEffect } from "react";
 
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 export function Header() {
   const { isSignedIn } = useUser();
@@ -91,23 +92,13 @@ export function Header() {
       <div className="container px-4 md:px-6 mx-auto max-w-[1392px] flex h-16 items-center justify-between">
         <div className="flex items-center gap-2">
           <Link href="/" className="flex items-center gap-2">
-            {/* LogoIpsum Placeholder */}
-            <svg
-              width="40"
-              height="40"
-              viewBox="0 0 40 40"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="text-primary"
-            >
-              <path
-                d="M20 0L40 20L20 40L0 20L20 0Z"
-                fill="currentColor"
-                fillOpacity="0.2"
-              />
-              <path d="M20 10L30 20L20 30L10 20L20 10Z" fill="currentColor" />
-            </svg>
-            <span className="text-xl font-bold tracking-tight">AI Gen</span>
+            <Image
+              src="/logo.svg"
+              alt="Logo"
+              height={40}
+              width={40}
+              className="h-10 lg:w-full md:w-[200px] w-[150px] object-contain"
+            />
           </Link>
         </div>
 
