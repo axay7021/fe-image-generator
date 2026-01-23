@@ -77,6 +77,8 @@ export function PhotoUploadCard({
           toast.error("File type not supported. Please use PNG, JPG, or WebP.");
         } else if (error.code === "file-too-large") {
           toast.error("File is too large. Maximum size is 10MB.");
+        } else if (error.code === "too-many-files") {
+          toast.error("Upload failed: Please select a single file to upload");
         } else {
           toast.error(`Upload failed: ${error.message}`);
         }
