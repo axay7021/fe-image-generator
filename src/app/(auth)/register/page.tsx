@@ -222,6 +222,9 @@ export default function RegisterPage() {
                 className="md:p-6 p-4 rounded-lg shadow-none border-gray-300"
                 required
               />
+              <p className="text-xs text-muted-foreground">
+                Minimum 3 characters
+              </p>
             </div>
             <div className="grid gap-2">
               <Label htmlFor="lastName" className="text-base md:text-lg">
@@ -235,6 +238,9 @@ export default function RegisterPage() {
                 className="md:p-6 p-4 rounded-lg shadow-none border-gray-300"
                 required
               />
+              <p className="text-xs text-muted-foreground">
+                Minimum 3 characters
+              </p>
             </div>
           </div>
           <div className="grid gap-2">
