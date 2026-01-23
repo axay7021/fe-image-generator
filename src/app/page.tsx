@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
+import { useUser } from "@clerk/nextjs";
 import { generateImageAction } from "@/actions/generate-image";
 import { Header } from "@/components/layout/Header";
 import { PhotoUploadCard } from "@/components/home/PhotoUploadCard";
@@ -54,6 +55,8 @@ export default function Home() {
     BACKGROUND_CATEGORIES[0].id,
   );
 
+  const { isSignedIn } = useUser();
+
   const { mutate, isPending } = useMutation({
     mutationFn: async () => {
       const formData = new FormData();
@@ -88,7 +91,14 @@ export default function Home() {
     onSuccess: (data) => {
       if (!data.success) {
         if (data.error?.includes("Daily limit reached")) {
-          router.push("/login");
+          if (!isSignedIn) {
+            router.push("/login");
+            toast.error("Please login to generate more images");
+          } else {
+            toast.error(
+              "Your plan quota is full. Please upgrade your plan to generate more images",
+            );
+          }
           return;
         }
         toast.error(`Generation failed: ${data.error}`);

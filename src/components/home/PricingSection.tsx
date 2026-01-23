@@ -73,14 +73,14 @@ export function PricingSection({ plans }: PricingSectionProps) {
   // Update viewMode based on subscription status (only once)
   useEffect(() => {
     if (!isCheckingSubscription && !hasInitialized) {
-      if (activePlanId) {
+      if (activePlanId || billingHistory.length > 0) {
         setViewMode("usage");
       } else {
         setViewMode("plans");
       }
       setHasInitialized(true);
     }
-  }, [isCheckingSubscription, activePlanId, hasInitialized]);
+  }, [isCheckingSubscription, activePlanId, billingHistory, hasInitialized]);
 
   const handleSubscribe = async (plan: PricingPlan) => {
     if (plan.variant === "free") {
@@ -161,26 +161,27 @@ export function PricingSection({ plans }: PricingSectionProps) {
         </div>
 
         {/* Top Right Actions */}
-        {activePlanId && !isCheckingSubscription && (
-          <div className="flex justify-end max-w-7xl mx-auto mb-8">
-            {viewMode === "usage" ? (
-              <Button
-                onClick={() => setViewMode("plans")}
-                className="rounded-xl"
-              >
-                Buy More Credits
-              </Button>
-            ) : (
-              <Button
-                variant="outline"
-                onClick={() => setViewMode("usage")}
-                className="rounded-xl"
-              >
-                Back to Dashboard
-              </Button>
-            )}
-          </div>
-        )}
+        {(activePlanId || billingHistory.length > 0) &&
+          !isCheckingSubscription && (
+            <div className="flex justify-end max-w-7xl mx-auto mb-8">
+              {viewMode === "usage" ? (
+                <Button
+                  onClick={() => setViewMode("plans")}
+                  className="rounded-xl"
+                >
+                  Buy More Credits
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  onClick={() => setViewMode("usage")}
+                  className="rounded-xl"
+                >
+                  Back to Dashboard
+                </Button>
+              )}
+            </div>
+          )}
 
         {isCheckingSubscription ? (
           // Skeleton Loading State
@@ -240,80 +241,115 @@ export function PricingSection({ plans }: PricingSectionProps) {
         ) : (
           <>
             {/* Usage Dashboard View */}
-            {viewMode === "usage" && subscriptionData && (
-              <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in zoom-in-95 duration-500">
-                <Card className="rounded-3xl shadow-xl border-blue-100 overflow-hidden">
-                  <CardHeader className="bg-blue-50/50 border-b border-blue-100 pb-8">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                      <div>
-                        <CardTitle className="text-2xl text-slate-900">
-                          {subscriptionData.plan.name}
-                        </CardTitle>
-                        {/* <CardDescription className="mt-2 text-base">
-                          Active until{" "}
-                          {new Date(
-                            subscriptionData.period_end,
-                          ).toLocaleDateString()}
-                        </CardDescription> */}
-                      </div>
-                      <div className="text-right">
-                        <div className="text-3xl font-bold text-slate-900">
-                          {quotaUsed} / {totalQuota}
+            {viewMode === "usage" && (
+              <>
+                {subscriptionData ? (
+                  <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in zoom-in-95 duration-500">
+                    <Card className="rounded-3xl shadow-xl border-blue-100 overflow-hidden">
+                      <CardHeader className="bg-blue-50/50 border-b border-blue-100 pb-8">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                          <div>
+                            <CardTitle className="text-2xl text-slate-900">
+                              {subscriptionData.plan.name}
+                            </CardTitle>
+                            {subscriptionData.status !== "active" && (
+                              <span
+                                className={cn(
+                                  "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ml-2",
+                                  subscriptionData.status === "quota_exhausted"
+                                    ? "bg-orange-100 text-orange-800"
+                                    : "bg-red-100 text-red-800",
+                                )}
+                              >
+                                {subscriptionData.status.replace(/_/g, " ")}
+                              </span>
+                            )}
+                            {/* <CardDescription className="mt-2 text-base">
+                              Active until{" "}
+                              {new Date(
+                                subscriptionData.period_end,
+                              ).toLocaleDateString()}
+                            </CardDescription> */}
+                          </div>
+                          <div className="text-right">
+                            <div className="text-3xl font-bold text-slate-900">
+                              {quotaUsed} / {totalQuota}
+                            </div>
+                            <div className="text-sm text-muted-foreground font-medium">
+                              Credits Used
+                            </div>
+                          </div>
                         </div>
-                        <div className="text-sm text-muted-foreground font-medium">
-                          Credits Used
-                        </div>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="p-8 space-y-8">
-                    {/* Progress Bar */}
-                    <div className="space-y-4">
-                      <div className="flex justify-between text-sm font-medium">
-                        <span className="text-slate-600">Usage Progress</span>
-                        <span
-                          className={cn(
-                            showEmptyCreditError
-                              ? "text-red-600"
-                              : showLowCreditWarning
-                                ? "text-orange-600"
-                                : "text-primary",
+                      </CardHeader>
+                      <CardContent className="p-8 space-y-8">
+                        {/* Progress Bar */}
+                        <div className="space-y-4">
+                          <div className="flex justify-between text-sm font-medium">
+                            <span className="text-slate-600">
+                              Usage Progress
+                            </span>
+                            <span
+                              className={cn(
+                                showEmptyCreditError
+                                  ? "text-red-600"
+                                  : showLowCreditWarning
+                                    ? "text-orange-600"
+                                    : "text-primary",
+                              )}
+                            >
+                              {percentage}% Used
+                            </span>
+                          </div>
+                          <div className="h-4 w-full bg-slate-100 rounded-full overflow-hidden">
+                            <div
+                              className={cn(
+                                "h-full transition-all duration-500 ease-out rounded-full",
+                                progressColor,
+                              )}
+                              style={{ width: `${percentage}%` }}
+                            />
+                          </div>
+                          {showLowCreditWarning && !showEmptyCreditError && (
+                            <div className="flex items-center gap-2 text-orange-600 bg-orange-50 px-4 py-3 rounded-xl">
+                              <AlertTriangle className="w-5 h-5 shrink-0" />
+                              <p className="text-sm font-medium">
+                                Your credits are running low. Consider upgrading
+                                or waiorting for the next cycle.
+                              </p>
+                            </div>
                           )}
+                          {showEmptyCreditError && (
+                            <div className="flex items-center gap-2 text-red-600 bg-red-50 px-4 py-3 rounded-xl">
+                              <AlertTriangle className="w-5 h-5 shrink-0" />
+                              <p className="text-sm font-medium">
+                                You have used all your credits. Please buy more
+                                to contotinue generating images.
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                ) : (
+                  <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in zoom-in-95 duration-500">
+                    <Card className="rounded-3xl shadow-xl border-gray-100 overflow-hidden bg-gray-50">
+                      <CardContent className="p-8 text-center space-y-4">
+                        <p className="text-lg text-muted-foreground">
+                          No active plan found.
+                        </p>
+                        <Button
+                          onClick={() => setViewMode("plans")}
+                          variant="outline"
+                          className="rounded-xl"
                         >
-                          {percentage}% Used
-                        </span>
-                      </div>
-                      <div className="h-4 w-full bg-slate-100 rounded-full overflow-hidden">
-                        <div
-                          className={cn(
-                            "h-full transition-all duration-500 ease-out rounded-full",
-                            progressColor,
-                          )}
-                          style={{ width: `${percentage}%` }}
-                        />
-                      </div>
-                      {showLowCreditWarning && !showEmptyCreditError && (
-                        <div className="flex items-center gap-2 text-orange-600 bg-orange-50 px-4 py-3 rounded-xl">
-                          <AlertTriangle className="w-5 h-5 shrink-0" />
-                          <p className="text-sm font-medium">
-                            Your credits are running low. Consider upgrading or
-                            waiting for the next cycle.
-                          </p>
-                        </div>
-                      )}
-                      {showEmptyCreditError && (
-                        <div className="flex items-center gap-2 text-red-600 bg-red-50 px-4 py-3 rounded-xl">
-                          <AlertTriangle className="w-5 h-5 shrink-0" />
-                          <p className="text-sm font-medium">
-                            You have used all your credits. Please buy more to
-                            continue generating images.
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
+                          View Available Plans
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+              </>
             )}
 
             {/* Plans Grid View */}

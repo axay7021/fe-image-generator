@@ -39,12 +39,7 @@ export function useSubscription() {
       try {
         // Fetch subscription
         const subRes = await getUserSubscription();
-        if (
-          subRes.success &&
-          subRes.data &&
-          (subRes.data.status === "active" ||
-            subRes.data.status === "quota_exhausted")
-        ) {
+        if (subRes.success && subRes.data) {
           setSubscription(subRes.data as SubscriptionData);
           setActivePlanId(subRes.data.plan.id);
         } else {

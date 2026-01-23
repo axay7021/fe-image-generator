@@ -55,7 +55,7 @@ export const BACKGROUND_CATEGORIES = [
     label: "Gradient Grey",
     color: "linear-gradient(to right, #bdc3c7, #2c3e50)",
   },
-  { id: "office", label: "Office", color: "#F5F5DC" }, // Placeholder color
+  // { id: "office", label: "Office", color: "#F5F5DC" }, // Placeholder color
   { id: "plain", label: "Plain", color: "#E0E0E0" },
   { id: "studio", label: "Studio", color: "#333333" },
   {
