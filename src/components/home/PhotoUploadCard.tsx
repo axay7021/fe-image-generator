@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -19,6 +19,17 @@ export function PhotoUploadCard({
   selectedImage,
 }: PhotoUploadCardProps) {
   const [preview, setPreview] = useState<string | null>(null);
+
+  // Sync preview with selectedImage prop on mount or change
+  useEffect(() => {
+    if (selectedImage) {
+      const objectUrl = URL.createObjectURL(selectedImage);
+      setPreview(objectUrl);
+      return () => URL.revokeObjectURL(objectUrl);
+    } else {
+      setPreview(null);
+    }
+  }, [selectedImage]);
 
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {

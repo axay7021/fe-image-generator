@@ -31,8 +31,8 @@ const faqs = [
 
 export function FAQSection() {
   return (
-    <section id="faq" className="py-24 max-w-3xl mx-auto">
-      <div className="text-center mb-12">
+    <section id="faq" className="pb-16 md:py-24 max-w-3xl mx-auto">
+      <div className="text-center md:mb-12 mb-6">
         <h2 className="text-3xl md:text-4xl font-bold text-[#538CE8]">FAQs</h2>
       </div>
 

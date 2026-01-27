@@ -47,29 +47,6 @@ export function PricingSection({ plans }: PricingSectionProps) {
 
   const [hasInitialized, setHasInitialized] = useState(false);
 
-  // Optimize Skeleton State using LocalStorage hint
-  const [skeletonMode, setSkeletonMode] = useState<"usage" | "plans">("plans");
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const hasSub = localStorage.getItem("user_has_subscription");
-      if (hasSub === "true") {
-        setSkeletonMode("usage");
-      }
-    }
-  }, []);
-
-  // Update localStorage when subscription state is confirmed
-  useEffect(() => {
-    if (!isCheckingSubscription) {
-      if (activePlanId) {
-        localStorage.setItem("user_has_subscription", "true");
-      } else {
-        localStorage.setItem("user_has_subscription", "false");
-      }
-    }
-  }, [isCheckingSubscription, activePlanId]);
-
   // Update viewMode based on subscription status (only once)
   useEffect(() => {
     if (!isCheckingSubscription && !hasInitialized) {
@@ -184,59 +161,28 @@ export function PricingSection({ plans }: PricingSectionProps) {
           )}
 
         {isCheckingSubscription ? (
-          // Skeleton Loading State
           <div className="w-full">
-            {skeletonMode === "usage" ? (
-              // Usage Skeleton
-              <div className="max-w-4xl mx-auto space-y-8">
-                <div className="rounded-3xl bg-white shadow-xl border border-gray-100 overflow-hidden p-8 space-y-8">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-100 pb-8">
-                    <div className="space-y-2">
-                      <Skeleton className="h-8 w-48 rounded-lg" />
-                    </div>
-                    <div className="text-right space-y-2">
-                      <Skeleton className="h-10 w-32 ml-auto rounded-lg" />
-                      <Skeleton className="h-4 w-24 ml-auto rounded-lg" />
-                    </div>
+            {/* Unified Skeleton (Matches loading.tsx) */}
+            <div className="max-w-4xl mx-auto space-y-8">
+              <div className="rounded-3xl bg-white shadow-xl border border-gray-100 overflow-hidden p-8 space-y-8">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-100 pb-8">
+                  <div className="space-y-2">
+                    <Skeleton className="h-8 w-48 rounded-lg" />
                   </div>
-                  <div className="space-y-4">
-                    <div className="flex justify-between">
-                      <Skeleton className="h-5 w-32 rounded-lg" />
-                      <Skeleton className="h-5 w-16 rounded-lg" />
-                    </div>
-                    <Skeleton className="h-4 w-full rounded-full" />
+                  <div className="text-right space-y-2">
+                    <Skeleton className="h-10 w-32 ml-auto rounded-lg" />
+                    <Skeleton className="h-4 w-24 ml-auto rounded-lg" />
                   </div>
                 </div>
-              </div>
-            ) : (
-              // Plans Skeleton
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-                {[1, 2, 3].map((i) => (
-                  <div
-                    key={i}
-                    className="relative w-full p-8 rounded-3xl bg-white shadow-xl border border-gray-100 flex flex-col space-y-8"
-                  >
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <Skeleton className="h-8 w-1/2 rounded-lg" />
-                        <Skeleton className="h-6 w-12 rounded-full" />
-                      </div>
-                      <Skeleton className="h-10 w-1/3 rounded-lg" />
-                      <Skeleton className="h-4 w-3/4 rounded-lg" />
-                    </div>
-                    <div className="flex-1 space-y-4">
-                      {[1, 2, 3, 4].map((j) => (
-                        <div key={j} className="flex gap-3">
-                          <Skeleton className="h-5 w-5 rounded-full shrink-0" />
-                          <Skeleton className="h-4 w-full rounded-lg" />
-                        </div>
-                      ))}
-                    </div>
-                    <Skeleton className="w-full h-12 rounded-xl" />
+                <div className="space-y-4">
+                  <div className="flex justify-between">
+                    <Skeleton className="h-5 w-32 rounded-lg" />
+                    <Skeleton className="h-5 w-16 rounded-lg" />
                   </div>
-                ))}
+                  <Skeleton className="h-4 w-full rounded-full" />
+                </div>
               </div>
-            )}
+            </div>
           </div>
         ) : (
           <>
@@ -264,12 +210,6 @@ export function PricingSection({ plans }: PricingSectionProps) {
                                 {subscriptionData.status.replace(/_/g, " ")}
                               </span>
                             )}
-                            {/* <CardDescription className="mt-2 text-base">
-                              Active until{" "}
-                              {new Date(
-                                subscriptionData.period_end,
-                              ).toLocaleDateString()}
-                            </CardDescription> */}
                           </div>
                           <div className="text-right">
                             <div className="text-3xl font-bold text-slate-900">

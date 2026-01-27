@@ -53,7 +53,7 @@ export function TransformationOptionsPanel({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="space-y-6"
+            className="space-y-4"
           >
             <h3 className="text-lg font-medium">Passport Details</h3>
             <div className="space-y-4 p-4 bg-muted/30 rounded-xl border border-border">
@@ -61,7 +61,7 @@ export function TransformationOptionsPanel({
               <RadioGroup
                 value={passportMode}
                 onValueChange={(v) => onPassportModeChange(v as PassportMode)}
-                className="flex flex-wrap gap-4"
+                className="flex flex-wrap gap-4 mt-2"
               >
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="standard" id="mode-standard" />
@@ -95,7 +95,7 @@ export function TransformationOptionsPanel({
               {passportMode === "suit" && (
                 <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
                   <div className="space-y-2">
-                    <Label className="text-xs text-muted-foreground">
+                    <Label className="text-sm text-muted-foreground">
                       Suit Color
                     </Label>
                     <select
@@ -109,7 +109,7 @@ export function TransformationOptionsPanel({
                     </select>
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-xs text-muted-foreground">
+                    <Label className="text-sm text-muted-foreground">
                       Tie Color
                     </Label>
                     <select
@@ -134,7 +134,7 @@ export function TransformationOptionsPanel({
                   <Textarea
                     id="passport-custom-prompt"
                     placeholder="e.g. wearing a tuxedo"
-                    className="resize-none h-24"
+                    className="resize-none h-24 placeholder:text-sm"
                     value={prompt}
                     onChange={(e) =>
                       onPromptChange(e.target.value.slice(0, 500))
@@ -155,33 +155,64 @@ export function TransformationOptionsPanel({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="space-y-6"
+            className="space-y-4"
           >
             <h3 className="text-lg font-medium">Select Professional Style</h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-3">
-              {LINKEDIN_STYLES.map((style) => (
-                <div
-                  key={style.id}
-                  className={cn(
-                    "group relative aspect-square rounded-xl overflow-hidden cursor-pointer border-2 transition-all duration-200",
-                    selectedStyle === style.id
-                      ? "border-[#538CE8] ring-2 ring-[#538CE8]/20"
-                      : "border-transparent hover:border-gray-200",
-                  )}
-                  onClick={() => onStyleSelect?.(style.id)}
-                >
-                  <Image
-                    src={style.img}
-                    alt={style.label}
-                    fill
-                    className="object-cover transition-transform duration-300 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
-                  <div className="absolute bottom-2 left-2 right-2 text-white text-xs md:text-sm font-medium z-10 leading-tight">
-                    {style.label}
+            <div className="grid grid-cols-3 md:gap-3 gap-1">
+              {LINKEDIN_STYLES.map((style) => {
+                const isLocked = style.isPremium;
+                return (
+                  <div
+                    key={style.id}
+                    className={cn(
+                      "group relative aspect-square rounded-xl overflow-hidden cursor-pointer border-2 transition-all duration-200",
+                      selectedStyle === style.id
+                        ? "border-[#538CE8] ring-2 ring-[#538CE8]/20"
+                        : "border-transparent hover:border-gray-200",
+                      isLocked && "grayscale-[0.5] opacity-90",
+                    )}
+                    onClick={() => {
+                      // Allow selection but maybe we want to trigger a modal or just visually show it's premium?
+                      // The prompt says "only classic corporate is free other all is disabled"
+                      // But usually user can select to PREVIEW it (or at least see it), but maybe they can't GENERATE.
+                      // For now, let's allow selection so they can see it, but visual cue is key.
+                      if (!isLocked) {
+                        onStyleSelect?.(style.id);
+                      }
+                    }}
+                  >
+                    <Image
+                      src={style.img}
+                      alt={style.label}
+                      fill
+                      className="object-cover transition-transform duration-300 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
+                    <div className="absolute bottom-2 left-2 right-2 text-white text-xs md:text-sm font-medium z-10 leading-tight">
+                      {style.label}
+                    </div>
+                    {isLocked && (
+                      <div className="absolute top-2 right-2 z-20 bg-black/60 rounded-full p-1 border border-white/20 backdrop-blur-sm">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="w-3 h-3 text-yellow-400"
+                        >
+                          <path d="M19.5 10.5c.828 0 1.5.672 1.5 1.5v9c0 .828-.672 1.5-1.5 1.5h-15c-.828 0-1.5-.672-1.5-1.5v-9c0-.828.672-1.5 1.5-1.5" />
+                          <path d="M7.75 10.5v-3a4.25 4.25 0 0 1 8.5 0v3" />
+                          <path d="M12 16.5v1.5" />
+                          <circle cx="12" cy="16.5" r="1.5" />
+                        </svg>
+                      </div>
+                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </motion.div>
         )}
@@ -192,7 +223,7 @@ export function TransformationOptionsPanel({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="space-y-6"
+            className="space-y-4"
           >
             <h3 className="text-lg font-medium">Custom Edit</h3>
             <div className="space-y-2">
@@ -200,7 +231,7 @@ export function TransformationOptionsPanel({
               <Textarea
                 id="prompt-input"
                 placeholder="Describe your desired image..."
-                className="resize-none h-32 focus-visible:ring-0 focus-visible:ring-offset-0"
+                className="resize-none h-32 focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-sm"
                 value={prompt}
                 onChange={(e) => onPromptChange(e.target.value.slice(0, 2000))}
               />
@@ -217,7 +248,7 @@ export function TransformationOptionsPanel({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="space-y-6"
+            className="space-y-4"
           >
             <h3 className="text-lg font-medium">
               {selectedType === "background"
@@ -228,37 +259,65 @@ export function TransformationOptionsPanel({
             {selectedType === "background" ? (
               <div className="space-y-4">
                 <Label>Select Background Style</Label>
-                <div className="grid grid-cols-4 gap-2">
-                  {BACKGROUND_CATEGORIES.map((cat) => (
-                    <div
-                      key={cat.id}
-                      className={cn(
-                        "group relative aspect-square rounded-lg cursor-pointer border overflow-hidden transition-all",
-                        bgCategory === cat.id
-                          ? "border-primary ring-2 ring-primary/20"
-                          : "border-border hover:border-gray-300",
-                      )}
-                      onClick={() => onBgCategoryChange?.(cat.id)}
-                      title={cat.label}
-                    >
+                <div className="grid md:grid-cols-4 grid-cols-3 gap-2 mt-2">
+                  {BACKGROUND_CATEGORIES.map((cat) => {
+                    const isLocked = cat.isPremium;
+                    return (
                       <div
-                        className="w-full h-full"
-                        style={{ background: cat.color }}
-                      />
-                      {cat.id === "custom" && (
-                        <div className="absolute inset-0 flex items-center justify-center p-1">
-                          <span className="text-[10px] sm:text-base font-medium text-white drop-shadow-md leading-tight text-center">
-                            Custom
-                          </span>
-                        </div>
-                      )}
-                      {bgCategory === cat.id && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                          <div className="w-2 h-2 bg-white rounded-full shadow-sm" />
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                        key={cat.id}
+                        className={cn(
+                          "group relative aspect-square rounded-lg cursor-pointer border overflow-hidden transition-all",
+                          bgCategory === cat.id
+                            ? "border-primary ring-2 ring-primary/20"
+                            : "border-border hover:border-gray-300",
+                        )}
+                        onClick={() => {
+                          if (!isLocked) {
+                            onBgCategoryChange?.(cat.id);
+                          }
+                        }}
+                        title={cat.label}
+                      >
+                        <div
+                          className="w-full h-full"
+                          style={{ background: cat.color }}
+                        />
+                        {cat.id === "custom" && (
+                          <div className="absolute inset-0 flex items-center justify-center p-1">
+                            <span className="text-[10px] sm:text-base font-medium text-white drop-shadow-md leading-tight text-center">
+                              Custom
+                            </span>
+                          </div>
+                        )}
+                        {bgCategory === cat.id && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                            <div className="w-2 h-2 bg-white rounded-full shadow-sm" />
+                          </div>
+                        )}
+                        {isLocked && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/10 z-10 pointer-events-none">
+                            <div className="bg-black/60 rounded-full p-1">
+                              {/* <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="w-3 h-3 text-yellow-400"
+                              >
+                                <path d="M19.5 10.5c.828 0 1.5.672 1.5 1.5v9c0 .828-.672 1.5-1.5 1.5h-15c-.828 0-1.5-.672-1.5-1.5v-9c0-.828.672-1.5 1.5-1.5" />
+                                <path d="M7.75 10.5v-3a4.25 4.25 0 0 1 8.5 0v3" />
+                                <path d="M12 16.5v1.5" />
+                                <circle cx="12" cy="16.5" r="1.5" />
+                              </svg> */}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
                 {bgCategory === "custom" && (
                   <div className="space-y-2 animate-in fade-in slide-in-from-top-1">

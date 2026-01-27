@@ -66,6 +66,11 @@ export function Header() {
     };
   }, [isMobileMenuOpen]);
 
+  // Scroll to top on route change
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
@@ -75,8 +80,9 @@ export function Header() {
   };
 
   const navLinks = [
-    { name: "How to use", href: "/#how-it-works" },
-    { name: "FAQs", href: "/#faq" },
+    // { name: "How to use", href: "/#how-it-works" },
+    // { name: "FAQs", href: "/#faq" },
+    { name: "Home", href: "/" },
     { name: "Plans", href: "/plans" },
   ];
 
@@ -86,7 +92,7 @@ export function Header() {
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
         isScrolled
           ? "bg-white/70 backdrop-blur-lg shadow-sm border-b border-white/20 supports-backdrop-filter:bg-white/60"
-          : "bg-transparent py-5",
+          : "bg-transparent md:py-5",
       )}
     >
       <div className="container px-4 md:px-6 mx-auto max-w-[1392px] flex h-16 items-center justify-between">
@@ -97,7 +103,7 @@ export function Header() {
               alt="Logo"
               height={40}
               width={40}
-              className="h-10 lg:w-full md:w-[200px] w-[150px] object-contain"
+              className="h-10 lg:w-full md:w-[200px] w-[180px] object-contain"
             />
           </Link>
         </div>
@@ -160,9 +166,9 @@ export function Header() {
             onClick={toggleMobileMenu}
           >
             {isMobileMenuOpen ? (
-              <X className="h-6 w-6" />
+              <X className="h-6! w-6!" />
             ) : (
-              <Menu className="h-6 w-6" />
+              <Menu className="h-6! w-6!" />
             )}
           </Button>
 
@@ -228,7 +234,7 @@ export function Header() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="fixed inset-0 z-40 bg-black/50 md:hidden h-[100dvh]"
+              className="fixed inset-0 z-40 bg-black/50 md:hidden h-dvh"
               onClick={closeMobileMenu}
             />
 
@@ -238,12 +244,12 @@ export function Header() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="fixed top-0 right-0 z-50 h-[100dvh] w-[300px] bg-background p-6 shadow-2xl flex flex-col md:hidden"
+              className="fixed top-0 right-0 z-50 h-dvh w-[300px] bg-background p-6 shadow-2xl flex flex-col md:hidden"
             >
               <div className="flex items-center justify-between mb-8">
                 <span className="text-xl font-bold tracking-tight">Menu</span>
                 <Button variant="ghost" size="icon" onClick={closeMobileMenu}>
-                  <X className="h-6 w-6" />
+                  <X className="h-6! w-6!" />
                 </Button>
               </div>
 
