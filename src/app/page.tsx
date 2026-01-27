@@ -18,7 +18,7 @@ import {
 import { TransformationOptionsPanel } from "@/components/home/TransformationOptionsPanel";
 import { ResultsPanel } from "@/components/home/ResultsPanel";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, CircleArrowLeft, Wand2 } from "lucide-react";
+import { ArrowLeft, Wand2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FeatureSection } from "@/components/home/FeatureSection";
 import { HowItWorks } from "@/components/home/HowItWorks";
@@ -38,7 +38,7 @@ export default function Home() {
   // Default to Passport on Desktop (lg breakpoint)
   useEffect(() => {
     if (window.innerWidth >= 1024) {
-      setSelectedType("passport");
+      setTimeout(() => setSelectedType("passport"), 0);
     }
   }, []);
 

@@ -22,12 +22,23 @@ export function PhotoUploadCard({
 
   // Sync preview with selectedImage prop on mount or change
   useEffect(() => {
+    let isMounted = true;
     if (selectedImage) {
       const objectUrl = URL.createObjectURL(selectedImage);
-      setPreview(objectUrl);
-      return () => URL.revokeObjectURL(objectUrl);
+      setTimeout(() => {
+        if (isMounted) setPreview(objectUrl);
+      }, 0);
+      return () => {
+        isMounted = false;
+        URL.revokeObjectURL(objectUrl);
+      };
     } else {
-      setPreview(null);
+      setTimeout(() => {
+        if (isMounted) setPreview(null);
+      }, 0);
+      return () => {
+        isMounted = false;
+      };
     }
   }, [selectedImage]);
 
