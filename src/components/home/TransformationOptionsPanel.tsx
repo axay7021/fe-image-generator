@@ -12,6 +12,7 @@ import {
   LINKEDIN_STYLES,
   BACKGROUND_CATEGORIES,
 } from "./TransformationSelector";
+import { Lock, LockKeyhole } from "lucide-react";
 
 interface TransformationOptionsPanelProps {
   selectedType: TransformationType;
@@ -193,21 +194,7 @@ export function TransformationOptionsPanel({
                     </div>
                     {isLocked && (
                       <div className="absolute top-2 right-2 z-20 bg-black/60 rounded-full p-1 border border-white/20 backdrop-blur-sm">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="w-3 h-3 text-yellow-400"
-                        >
-                          <path d="M19.5 10.5c.828 0 1.5.672 1.5 1.5v9c0 .828-.672 1.5-1.5 1.5h-15c-.828 0-1.5-.672-1.5-1.5v-9c0-.828.672-1.5 1.5-1.5" />
-                          <path d="M7.75 10.5v-3a4.25 4.25 0 0 1 8.5 0v3" />
-                          <path d="M12 16.5v1.5" />
-                          <circle cx="12" cy="16.5" r="1.5" />
-                        </svg>
+                        <LockKeyhole className="w-3 h-3 text-yellow-400" />
                       </div>
                     )}
                   </div>
@@ -297,21 +284,7 @@ export function TransformationOptionsPanel({
                         {isLocked && (
                           <div className="absolute inset-0 flex items-center justify-center bg-black/10 z-10 pointer-events-none">
                             <div className="bg-black/60 rounded-full p-1">
-                              {/* <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                className="w-3 h-3 text-yellow-400"
-                              >
-                                <path d="M19.5 10.5c.828 0 1.5.672 1.5 1.5v9c0 .828-.672 1.5-1.5 1.5h-15c-.828 0-1.5-.672-1.5-1.5v-9c0-.828.672-1.5 1.5-1.5" />
-                                <path d="M7.75 10.5v-3a4.25 4.25 0 0 1 8.5 0v3" />
-                                <path d="M12 16.5v1.5" />
-                                <circle cx="12" cy="16.5" r="1.5" />
-                              </svg> */}
+                              <LockKeyhole className="w-3 h-3 text-yellow-400" />
                             </div>
                           </div>
                         )}

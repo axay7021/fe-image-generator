@@ -42,6 +42,15 @@ export function PricingSection({ plans }: PricingSectionProps) {
   } = useSubscription();
 
   const [viewMode, setViewMode] = useState<"usage" | "plans">("plans");
+  const [selectedPlanId, setSelectedPlanId] = useState<string>("");
+
+  useEffect(() => {
+    // Initialize selected plan to popular or first plan
+    if (plans.length > 0 && !selectedPlanId) {
+      const popular = plans.find((p) => p.is_popular) || plans[0];
+      setSelectedPlanId(popular.id);
+    }
+  }, [plans, selectedPlanId]);
 
   const router = useRouter();
 
@@ -113,9 +122,9 @@ export function PricingSection({ plans }: PricingSectionProps) {
   }
 
   return (
-    <section id="plans" className="py-24 relative overflow-hidden">
+    <section id="plans" className="py-18 md:py-24 relative overflow-hidden">
       <div className="container px-4 md:px-6 mx-auto relative z-10">
-        <div className="text-center space-y-4 mb-8">
+        <div className="text-center space-y-2 md:mb-8">
           {isCheckingSubscription ? (
             <div className="space-y-4 flex flex-col items-center">
               <Skeleton className="h-12 w-3/4 md:w-1/2 rounded-lg" />
@@ -123,12 +132,12 @@ export function PricingSection({ plans }: PricingSectionProps) {
             </div>
           ) : (
             <>
-              <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-[#538ce8]">
+              <h2 className="text-2xl md:text-4xl font-bold tracking-tight text-[#538ce8]">
                 {viewMode === "usage"
                   ? "Your Plans"
                   : "Choose Your Perfect Plan"}
               </h2>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              <p className="text-base text-muted-foreground max-w-2xl mx-auto md:mb-auto mb-4">
                 Generate professional-grade AI images instantly. Choose a
                 flexible plan that fits your creative workflow and start
                 building today.
@@ -163,7 +172,7 @@ export function PricingSection({ plans }: PricingSectionProps) {
         {isCheckingSubscription ? (
           <div className="w-full">
             {/* Unified Skeleton (Matches loading.tsx) */}
-            <div className="max-w-4xl mx-auto space-y-8">
+            <div className="max-w-4xl mx-auto space-y-8 mt-8">
               <div className="rounded-3xl bg-white shadow-xl border border-gray-100 overflow-hidden p-8 space-y-8">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-100 pb-8">
                   <div className="space-y-2">
@@ -292,129 +301,217 @@ export function PricingSection({ plans }: PricingSectionProps) {
               </>
             )}
 
-            {/* Plans Grid View */}
+            {/* Plans Grid View (Desktop) */}
             {viewMode === "plans" && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto items-start animate-in fade-in slide-in-from-bottom-8 duration-500">
-                {displayPlans.map((plan) => {
-                  // Highlight "Plush" or middle plan as popular if nothing active
-                  const isPopular = plan.is_popular;
+              <>
+                <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto items-start animate-in fade-in slide-in-from-bottom-8 duration-500">
+                  {displayPlans.map((plan) => {
+                    // Highlight "Plush" or middle plan as popular if nothing active
+                    const isPopular = plan.is_popular;
 
-                  return (
-                    <div
-                      key={plan.id}
-                      className={cn(
-                        "relative w-full rounded-3xl transition-all duration-300 flex flex-col",
-                        isPopular
-                          ? "shadow-2xl bg-[#538CE8] z-10 pt-10 px-[3px] pb-[3px]"
-                          : "bg-white shadow-xl border border-blue-200 hover:scale-[1.02] hover:shadow-blue-500/20 p-8 mt-9",
-                      )}
-                    >
-                      {isPopular && (
-                        <div className="absolute top-0 left-0 right-0 h-10 flex items-center justify-center text-white text-sm font-medium">
-                          Recommended
-                        </div>
-                      )}
-
+                    return (
                       <div
+                        key={plan.id}
                         className={cn(
-                          "flex flex-col flex-1",
+                          "relative w-full rounded-3xl transition-all duration-300 flex flex-col",
                           isPopular
-                            ? "bg-linear-to-b from-[#FFFFFF] to-[#E5EFFF] p-8 pt-6 rounded-[22px]"
-                            : "bg-white",
+                            ? "shadow-2xl bg-[#538CE8] z-10 pt-10 px-[3px] pb-[3px]"
+                            : "bg-white shadow-xl border border-blue-200 hover:scale-[1.02] hover:shadow-blue-500/20 p-8 mt-9",
                         )}
                       >
-                        <div className="mb-8 space-y-4 text-left">
-                          <div className="flex items-center justify-between">
-                            <h3
-                              className="text-2xl font-bold text-slate-900 line-clamp-1"
-                              title={plan.name}
-                            >
-                              {plan.name}
-                            </h3>
-                            {/* Optional Badge */}
-                            {plan.name.toUpperCase().includes("PRO") && (
-                              <span className="bg-blue-100 text-blue-700 text-xs px-3 py-1 rounded-full font-bold tracking-wide">
-                                PRO
-                              </span>
-                            )}
+                        {isPopular && (
+                          <div className="absolute top-0 left-0 right-0 h-10 flex items-center justify-center text-white text-sm font-medium">
+                            Recommended
                           </div>
+                        )}
 
-                          <div className="flex items-baseline gap-1">
-                            <span className="text-4xl font-bold text-black">
-                              {plan.price.includes("$")
-                                ? plan.price.split(" ")[0]
-                                : plan.price}
-                            </span>
-                          </div>
-                          <p className="text-sm text-muted-foreground leading-relaxed h-10">
-                            {plan.subtitle}
-                          </p>
-                        </div>
-
-                        <div className="flex-1 mb-8">
-                          <ul className="space-y-4 px-1">
-                            {plan.features.map((feature, idx) => (
-                              <li key={idx} className="flex items-start gap-3">
-                                <div
-                                  className={cn(
-                                    "rounded-full p-1 shrink-0 mt-0.5",
-                                    feature.included
-                                      ? "bg-green-100 text-green-600"
-                                      : "bg-slate-100 text-slate-400",
-                                  )}
-                                >
-                                  {feature.included ? (
-                                    <Check className="w-3.5 h-3.5" />
-                                  ) : (
-                                    <X className="w-3.5 h-3.5" />
-                                  )}
-                                </div>
-                                <span
-                                  className={cn(
-                                    "text-sm",
-                                    feature.included
-                                      ? "text-slate-700 font-medium"
-                                      : "text-slate-400 line-through",
-                                  )}
-                                >
-                                  {feature.name}
+                        <div
+                          className={cn(
+                            "flex flex-col flex-1",
+                            isPopular
+                              ? "bg-linear-to-b from-[#FFFFFF] to-[#E5EFFF] p-8 pt-6 rounded-[22px]"
+                              : "bg-white",
+                          )}
+                        >
+                          <div className="mb-8 space-y-4 text-left">
+                            <div className="flex items-center justify-between">
+                              <h3
+                                className="text-2xl font-bold text-slate-900 line-clamp-1"
+                                title={plan.name}
+                              >
+                                {plan.name}
+                              </h3>
+                              {/* Optional Badge */}
+                              {plan.name.toUpperCase().includes("PRO") && (
+                                <span className="bg-blue-100 text-blue-700 text-xs px-3 py-1 rounded-full font-bold tracking-wide">
+                                  PRO
                                 </span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
+                              )}
+                            </div>
 
-                        <div className="space-y-3 mt-auto">
-                          <Button
-                            onClick={() => handleSubscribe(plan)}
-                            disabled={isCheckingSubscription}
-                            className={cn(
-                              "w-full h-12 rounded-xl text-lg font-semibold transition-all duration-300 shadow-md",
-                              isPopular
-                                ? "bg-[#538CE8] hover:bg-[#538CE8]/90 text-white shadow-[#538CE8]/20"
-                                : "bg-primary hover:opacity-90 text-white shadow-blue-500/20",
-                            )}
-                          >
-                            {isCheckingSubscription ? (
-                              <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Checking...
-                              </>
-                            ) : (
-                              plan.action
-                            )}
-                          </Button>
+                            <div className="flex items-baseline gap-1">
+                              <span className="text-4xl font-bold text-black">
+                                {plan.price.includes("$")
+                                  ? plan.price.split(" ")[0]
+                                  : plan.price}
+                              </span>
+                            </div>
+                            <p className="text-sm text-muted-foreground leading-relaxed h-10">
+                              {plan.subtitle}
+                            </p>
+                          </div>
+
+                          <div className="flex-1 mb-8">
+                            <ul className="space-y-4 px-1">
+                              {plan.features.map((feature, idx) => (
+                                <li
+                                  key={idx}
+                                  className="flex items-start gap-3"
+                                >
+                                  <div
+                                    className={cn(
+                                      "rounded-full p-1 shrink-0 mt-0.5",
+                                      feature.included
+                                        ? "bg-green-100 text-green-600"
+                                        : "bg-slate-100 text-slate-400",
+                                    )}
+                                  >
+                                    {feature.included ? (
+                                      <Check className="w-3.5 h-3.5" />
+                                    ) : (
+                                      <X className="w-3.5 h-3.5" />
+                                    )}
+                                  </div>
+                                  <span
+                                    className={cn(
+                                      "text-sm",
+                                      feature.included
+                                        ? "text-slate-700 font-medium"
+                                        : "text-slate-400 line-through",
+                                    )}
+                                  >
+                                    {feature.name}
+                                  </span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+
+                          <div className="space-y-3 mt-auto">
+                            <Button
+                              onClick={() => handleSubscribe(plan)}
+                              disabled={isCheckingSubscription}
+                              className={cn(
+                                "w-full h-12 rounded-xl text-lg font-semibold transition-all duration-300 shadow-md",
+                                isPopular
+                                  ? "bg-[#538CE8] hover:bg-[#538CE8]/90 text-white shadow-[#538CE8]/20"
+                                  : "bg-primary hover:opacity-90 text-white shadow-blue-500/20",
+                              )}
+                            >
+                              {isCheckingSubscription ? (
+                                <>
+                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                  Checking...
+                                </>
+                              ) : (
+                                plan.action
+                              )}
+                            </Button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+
+                {/* Mobile List View (New Compact Design) */}
+                <div className="md:hidden space-y-4 max-w-md mx-auto animate-in fade-in slide-in-from-bottom-8 duration-500">
+                  {displayPlans.map((plan) => {
+                    const isSelected = selectedPlanId === plan.id;
+                    const isPopular = plan.is_popular;
+
+                    return (
+                      <div
+                        key={plan.id}
+                        onClick={() => setSelectedPlanId(plan.id)}
+                        className={cn(
+                          "relative rounded-2xl border-2 p-4 transition-all duration-200 cursor-pointer overflow-hidden",
+                          isSelected
+                            ? "border-[#538CE8] bg-blue-50/50 shadow-md ring-1 ring-[#538CE8]/20"
+                            : "border-gray-100 bg-white shadow-sm active:scale-[0.98]",
+                        )}
+                      >
+                        {isPopular && (
+                          <div className="absolute top-0 right-0 bg-[#538CE8] text-white text-[10px] font-bold px-2 py-1 rounded-bl-xl shadow-sm">
+                            Best Value
+                          </div>
+                        )}
+                        <div className="flex items-center gap-4">
+                          {/* Radio Indicator */}
+                          <div
+                            className={cn(
+                              "w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors",
+                              isSelected
+                                ? "border-[#538CE8] bg-[#538CE8]"
+                                : "border-gray-300 bg-transparent",
+                            )}
+                          >
+                            {isSelected && (
+                              <Check className="w-3.5 h-3.5 text-white stroke-3" />
+                            )}
+                          </div>
+
+                          {/* Content */}
+                          <div className="flex-1">
+                            <div className="flex justify-between items-center mb-1">
+                              <h3 className="font-bold text-gray-900 text-lg">
+                                {plan.name}
+                              </h3>
+                              <span className="font-bold text-lg text-gray-900">
+                                {plan.price.includes("$")
+                                  ? plan.price.split(" ")[0]
+                                  : plan.price}
+                              </span>
+                            </div>
+                            <p className="text-sm text-gray-500 leading-tight">
+                              {plan.subtitle}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Mobile Sticky CTA - Now Static at Bottom */}
+                <div className="md:hidden mt-8">
+                  <Button
+                    onClick={() => {
+                      const selectedPlan = plans.find(
+                        (p) => p.id === selectedPlanId,
+                      );
+                      if (selectedPlan) handleSubscribe(selectedPlan);
+                    }}
+                    disabled={isCheckingSubscription || !selectedPlanId}
+                    className="w-full h-14 rounded-xl text-lg font-bold bg-[#538CE8] hover:bg-[#538CE8]/90 text-white shadow-lg shadow-blue-500/25"
+                  >
+                    {isCheckingSubscription ? (
+                      <>
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      plans.find((p) => p.id === selectedPlanId)?.action ||
+                      "Subscribe"
+                    )}
+                  </Button>
+                </div>
+              </>
             )}
 
             {/* Billing History Section */}
             {viewMode === "usage" && billingHistory.length > 0 && (
-              <div className="max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-6 duration-700 delay-200 mt-24">
+              <div className="max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-6 duration-700 delay-200 md:mt-24 mt-12">
                 <Card className="rounded-3xl shadow-lg border-none bg-white/50 backdrop-blur-sm">
                   <CardHeader>
                     <CardTitle className="text-2xl">Billing History</CardTitle>
