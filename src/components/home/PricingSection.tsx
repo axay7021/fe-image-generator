@@ -425,7 +425,7 @@ export function PricingSection({ plans }: PricingSectionProps) {
                 </div>
 
                 {/* Mobile List View (New Compact Design) */}
-                <div className="md:hidden space-y-4 max-w-md mx-auto animate-in fade-in slide-in-from-bottom-8 duration-500">
+                <div className="md:hidden space-y-4 mx-auto animate-in fade-in slide-in-from-bottom-8 duration-500">
                   {displayPlans.map((plan) => {
                     const isSelected = selectedPlanId === plan.id;
                     const isPopular = plan.is_popular;
