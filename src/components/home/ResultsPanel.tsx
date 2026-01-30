@@ -26,7 +26,7 @@ interface ResultsPanelProps {
 
 function DownloadDropdown({ resultUrl }: { resultUrl: string }) {
   const [isUpscaling, setIsUpscaling] = useState(false);
-  const { activePlanId } = useSubscription();
+  const { activePlanId, refreshSubscription } = useSubscription();
 
   // If activePlanId is present, user has a subscription
   const isSubscribed = !!activePlanId;
@@ -66,6 +66,7 @@ function DownloadDropdown({ resultUrl }: { resultUrl: string }) {
       const data = await upscaleImageAction(formData);
 
       if (data.success && data.imageUrl) {
+        await refreshSubscription();
         toast.success("Image enhanced and downloaded!");
         const link = document.createElement("a");
         link.download = `gemini-magic-${size}px-enhanced.png`;

@@ -2,6 +2,7 @@
 
 import { SubscriptionData, BillingHistoryItem } from "@/util/types";
 import { auth } from "@clerk/nextjs/server";
+import { headers } from "next/headers";
 
 export interface SubscriptionResponse {
   statusCode: number;
@@ -26,11 +27,16 @@ export async function getUserSubscription() {
     const { getToken } = await auth();
     const token = await getToken();
 
+    // Get IP
+    const headersList = await headers();
+    const ip = headersList.get("x-forwarded-for") || "127.0.0.1";
+
     const response = await fetch(`${baseUrl}/my-subscription`, {
       method: "GET",
       headers: {
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
         "Content-Type": "application/json",
+        "X-Forwarded-For": ip,
       },
       next: { revalidate: 0 },
     });
@@ -60,11 +66,16 @@ export async function getUserBillingHistory() {
     const { getToken } = await auth();
     const token = await getToken();
 
+    // Get IP
+    const headersList = await headers();
+    const ip = headersList.get("x-forwarded-for") || "127.0.0.1";
+
     const response = await fetch(`${baseUrl}/my-subscription-history`, {
       method: "GET",
       headers: {
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
         "Content-Type": "application/json",
+        "X-Forwarded-For": ip,
       },
       next: { revalidate: 0 },
     });

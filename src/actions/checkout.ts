@@ -9,6 +9,7 @@ export interface CheckoutResponse {
 }
 
 import { auth } from "@clerk/nextjs/server";
+import { headers } from "next/headers";
 
 export async function createCheckoutSession(
   planId: string,
@@ -23,11 +24,17 @@ export async function createCheckoutSession(
     // Get Clerk auth token
     const { getToken } = await auth();
     const token = await getToken();
+
+    // Get IP
+    const headersList = await headers();
+    const ip = headersList.get("x-forwarded-for") || "127.0.0.1";
+
     const response = await fetch(`${baseUrl}/checkout/${planId}`, {
       method: "POST",
       headers: {
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
         "Content-Type": "application/json",
+        "X-Forwarded-For": ip,
       },
     });
     const data = await response.json();

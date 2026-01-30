@@ -1,6 +1,13 @@
 "use client";
 
-import { createContext, useContext, ReactNode, useMemo } from "react";
+import {
+  createContext,
+  useContext,
+  ReactNode,
+  useMemo,
+  useEffect,
+  useRef,
+} from "react";
 import { toast } from "react-hot-toast";
 import { useAuth as useClerkAuth, useUser } from "@clerk/nextjs";
 
@@ -29,10 +36,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { isLoaded, isSignedIn, getToken, signOut } = useClerkAuth();
   const { user: clerkUser } = useUser();
 
+  // Track previous sign-in state to reload on logout via UserButton
+  const wasSignedInRef = useRef<boolean | undefined>(undefined);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+
+    // specific check: IF we were signed in, and now we are NOT, then we just logged out.
+    if (wasSignedInRef.current === true && !isSignedIn) {
+      window.location.reload();
+    }
+
+    wasSignedInRef.current = !!isSignedIn;
+  }, [isLoaded, isSignedIn]);
+
   const logout = async () => {
     try {
       await signOut();
-      toast.success("Logged out successfully");
+      window.location.reload();
     } catch (error) {
       console.error("Logout error:", error);
       toast.error("Failed to log out");

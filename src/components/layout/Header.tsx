@@ -13,17 +13,47 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, Loader2, Menu, X } from "lucide-react";
+import { LogOut, Loader2, Menu, X, Coins } from "lucide-react";
+import { useSubscription } from "@/hooks/use-subscription";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useState, useEffect } from "react";
 
-import { motion, AnimatePresence } from "framer-motion";
+import {
+  motion,
+  AnimatePresence,
+  useSpring,
+  useTransform,
+  useMotionValue,
+} from "framer-motion";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+
+function AnimatedCounter({ value }: { value: number }) {
+  const motionValue = useMotionValue(value);
+  const spring = useSpring(motionValue, {
+    mass: 0.8,
+    stiffness: 75,
+    damping: 15,
+  });
+  const display = useTransform(spring, (current) =>
+    Math.round(current).toLocaleString(),
+  );
+
+  useEffect(() => {
+    motionValue.set(value);
+  }, [value, motionValue]);
+
+  return <motion.span>{display}</motion.span>;
+}
 
 export function Header() {
   const { isSignedIn } = useUser();
   const { user, logout, isLoading } = useAuth();
+  const { subscription } = useSubscription();
+
+  const credits = subscription
+    ? subscription.image_generation_limit - subscription.quota_used
+    : 0;
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
@@ -157,8 +187,17 @@ export function Header() {
           })}
         </nav>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 md:gap-4">
           {/* Mobile Menu Toggle */}
+          {isSignedIn && (
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-[#EDEDED] border border-[#EFEFFB] rounded-full text-sm font-medium transition-colors hover:bg-secondary">
+              <Coins className="w-4 h-4 text-yellow-500" />
+              <div className="md:text-lg tabular-nums">
+                <AnimatedCounter value={credits > 0 ? credits : 0} />
+              </div>
+            </div>
+          )}
+
           <Button
             variant="ghost"
             size="icon"
@@ -216,8 +255,13 @@ export function Header() {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button asChild className="rounded-xl px-6">
-                <Link href="/login">Login/Signup</Link>
+              <Button
+                asChild
+                className="bg-transparent hover:bg-transparent shadow-none p-0 h-auto"
+              >
+                <Link href="/login" className="login-shine-btn">
+                  Login/Signup
+                </Link>
               </Button>
             )}
           </div>

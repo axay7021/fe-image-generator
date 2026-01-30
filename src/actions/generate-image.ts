@@ -1,6 +1,7 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
+import { headers } from "next/headers";
 
 export async function generateImageAction(formData: FormData) {
   const type = formData.get("type") as string;
@@ -15,6 +16,10 @@ export async function generateImageAction(formData: FormData) {
   // Get Clerk auth token
   const { getToken } = await auth();
   const token = await getToken();
+
+  // Get IP
+  const headersList = await headers();
+  const ip = headersList.get("x-forwarded-for") || "127.0.0.1";
 
   let endpointAction = "";
   switch (type) {
@@ -71,7 +76,9 @@ export async function generateImageAction(formData: FormData) {
   }
 
   try {
-    const headers: HeadersInit = {};
+    const headers: HeadersInit = {
+      "X-Forwarded-For": ip,
+    };
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
     }

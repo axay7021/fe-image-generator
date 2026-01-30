@@ -4,6 +4,7 @@ import "./globals.css";
 import { ReactQueryProvider } from "@/components/providers/query-provider";
 import { ClerkProvider } from "@clerk/nextjs";
 import { AuthProvider } from "@/context/auth-context";
+import { SubscriptionProvider } from "@/context/subscription-context";
 import { Toaster } from "react-hot-toast";
 import { FooterWrapper } from "@/components/layout/FooterWrapper";
 
@@ -95,9 +96,11 @@ export default function RootLayout({
         >
           <ReactQueryProvider>
             <AuthProvider>
-              <main className="flex-1">{children}</main>
-              <Toaster position="top-center" />
-              <FooterWrapper />
+              <SubscriptionProvider>
+                <main className="flex-1">{children}</main>
+                <Toaster position="top-center" />
+                <FooterWrapper />
+              </SubscriptionProvider>
             </AuthProvider>
           </ReactQueryProvider>
         </body>

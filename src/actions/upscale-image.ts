@@ -1,6 +1,7 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
+import { headers } from "next/headers";
 
 export async function upscaleImageAction(formData: FormData) {
   const file = formData.get("file") as File;
@@ -15,6 +16,10 @@ export async function upscaleImageAction(formData: FormData) {
   const { getToken } = await auth();
   const token = await getToken();
 
+  // Get IP
+  const headersList = await headers();
+  const ip = headersList.get("x-forwarded-for") || "127.0.0.1";
+
   const apiFormData = new FormData();
   apiFormData.append("file", file);
   apiFormData.append("target_width", targetWidth);
@@ -24,6 +29,7 @@ export async function upscaleImageAction(formData: FormData) {
       method: "POST",
       headers: {
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        "X-Forwarded-For": ip,
       },
       body: apiFormData,
     });

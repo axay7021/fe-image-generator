@@ -14,6 +14,9 @@ import {
 } from "./TransformationSelector";
 import { Lock, LockKeyhole } from "lucide-react";
 
+import { useSubscription } from "@/hooks/use-subscription";
+import { useAuth } from "@/context/auth-context";
+
 interface TransformationOptionsPanelProps {
   selectedType: TransformationType;
   prompt: string;
@@ -45,6 +48,10 @@ export function TransformationOptionsPanel({
   bgCategory,
   onBgCategoryChange,
 }: TransformationOptionsPanelProps) {
+  const { subscription, isLoading } = useSubscription();
+  const { isSignedIn } = useAuth();
+  const isPremiumUser = isSignedIn && subscription?.status === "active";
+
   return (
     <div className="h-full">
       <AnimatePresence mode="wait">
@@ -161,7 +168,7 @@ export function TransformationOptionsPanel({
             <h3 className="text-lg font-medium">Select Professional Style</h3>
             <div className="grid grid-cols-3 md:gap-3 gap-1">
               {LINKEDIN_STYLES.map((style) => {
-                const isLocked = style.isPremium;
+                const isLocked = style.isPremium && !isPremiumUser;
                 return (
                   <div
                     key={style.id}
@@ -248,7 +255,7 @@ export function TransformationOptionsPanel({
                 <Label>Select Background Style</Label>
                 <div className="grid md:grid-cols-4 grid-cols-3 gap-2 mt-2">
                   {BACKGROUND_CATEGORIES.map((cat) => {
-                    const isLocked = cat.isPremium;
+                    const isLocked = cat.isPremium && !isPremiumUser;
                     return (
                       <div
                         key={cat.id}

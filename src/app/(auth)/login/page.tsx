@@ -253,7 +253,7 @@ export default function LoginPage() {
             </div>
             <div className="relative flex justify-center md:text-base text-sm uppercase">
               <span className="bg-card px-2 text-[#667085]">
-                Or continue with
+                Or continue with email
               </span>
             </div>
           </div>
@@ -300,7 +300,7 @@ export default function LoginPage() {
           Don&apos;t have an account?{" "}
           <Link
             href="/register"
-            className="underline underline-offset-4 hover:text-primary"
+            className="underline underline-offset-4 hover:text-primary text-black font-semibold"
           >
             Sign up
           </Link>
