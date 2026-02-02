@@ -1,21 +1,21 @@
-"use client";
+'use client';
 
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
-import { Textarea } from "@/components/ui/textarea";
-import { motion, AnimatePresence } from "framer-motion";
-import Image from "next/image";
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
+import { Textarea } from '@/components/ui/textarea';
+import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 import {
   TransformationType,
   PassportMode,
   LINKEDIN_STYLES,
   BACKGROUND_CATEGORIES,
-} from "./TransformationSelector";
-import { Lock, LockKeyhole } from "lucide-react";
+} from './TransformationSelector';
+import { LockKeyhole } from 'lucide-react';
 
-import { useSubscription } from "@/hooks/use-subscription";
-import { useAuth } from "@/context/auth-context";
+import { useSubscription } from '@/hooks/use-subscription';
+import { useAuth } from '@/context/auth-context';
 
 interface TransformationOptionsPanelProps {
   selectedType: TransformationType;
@@ -48,14 +48,14 @@ export function TransformationOptionsPanel({
   bgCategory,
   onBgCategoryChange,
 }: TransformationOptionsPanelProps) {
-  const { subscription, isLoading } = useSubscription();
+  const { subscription } = useSubscription();
   const { isSignedIn } = useAuth();
-  const isPremiumUser = isSignedIn && subscription?.status === "active";
+  const isPremiumUser = isSignedIn && subscription?.status === 'active';
 
   return (
     <div className="h-full">
       <AnimatePresence mode="wait">
-        {selectedType === "passport" && (
+        {selectedType === 'passport' && (
           <motion.div
             key="passport"
             initial={{ opacity: 0, y: 10 }}
@@ -73,39 +73,28 @@ export function TransformationOptionsPanel({
               >
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="standard" id="mode-standard" />
-                  <Label
-                    htmlFor="mode-standard"
-                    className="text-sm font-normal cursor-pointer"
-                  >
+                  <Label htmlFor="mode-standard" className="text-sm font-normal cursor-pointer">
                     Standard
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="suit" id="mode-suit" />
-                  <Label
-                    htmlFor="mode-suit"
-                    className="text-sm font-normal cursor-pointer"
-                  >
+                  <Label htmlFor="mode-suit" className="text-sm font-normal cursor-pointer">
                     Pro Suit
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="custom" id="mode-custom" />
-                  <Label
-                    htmlFor="mode-custom"
-                    className="text-sm font-normal cursor-pointer"
-                  >
+                  <Label htmlFor="mode-custom" className="text-sm font-normal cursor-pointer">
                     Custom
                   </Label>
                 </div>
               </RadioGroup>
 
-              {passportMode === "suit" && (
+              {passportMode === 'suit' && (
                 <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
                   <div className="space-y-2">
-                    <Label className="text-sm text-muted-foreground">
-                      Suit Color
-                    </Label>
+                    <Label className="text-sm text-muted-foreground">Suit Color</Label>
                     <select
                       className="w-full text-sm rounded-lg border border-input bg-background px-3 py-2"
                       value={suitColor}
@@ -117,9 +106,7 @@ export function TransformationOptionsPanel({
                     </select>
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-sm text-muted-foreground">
-                      Tie Color
-                    </Label>
+                    <Label className="text-sm text-muted-foreground">Tie Color</Label>
                     <select
                       className="w-full text-sm rounded-lg border border-input bg-background px-3 py-2"
                       value={tieColor}
@@ -134,19 +121,15 @@ export function TransformationOptionsPanel({
                 </div>
               )}
 
-              {passportMode === "custom" && (
+              {passportMode === 'custom' && (
                 <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                  <Label htmlFor="passport-custom-prompt">
-                    Custom Instructions
-                  </Label>
+                  <Label htmlFor="passport-custom-prompt">Custom Instructions</Label>
                   <Textarea
                     id="passport-custom-prompt"
                     placeholder="e.g. wearing a tuxedo"
                     className="resize-none h-24 placeholder:text-sm"
                     value={prompt}
-                    onChange={(e) =>
-                      onPromptChange(e.target.value.slice(0, 500))
-                    }
+                    onChange={(e) => onPromptChange(e.target.value.slice(0, 500))}
                   />
                   <div className="text-right text-xs text-muted-foreground">
                     {prompt.length}/500
@@ -157,7 +140,7 @@ export function TransformationOptionsPanel({
           </motion.div>
         )}
 
-        {selectedType === "linkedin" && (
+        {selectedType === 'linkedin' && (
           <motion.div
             key="linkedin"
             initial={{ opacity: 0, y: 10 }}
@@ -173,11 +156,11 @@ export function TransformationOptionsPanel({
                   <div
                     key={style.id}
                     className={cn(
-                      "group relative aspect-square rounded-xl overflow-hidden cursor-pointer border-2 transition-all duration-200",
+                      'group relative aspect-square rounded-xl overflow-hidden cursor-pointer border-2 transition-all duration-200',
                       selectedStyle === style.id
-                        ? "border-[#538CE8] ring-2 ring-[#538CE8]/20"
-                        : "border-transparent hover:border-gray-200",
-                      isLocked && "grayscale-[0.5] opacity-90",
+                        ? 'border-[#538CE8] ring-2 ring-[#538CE8]/20'
+                        : 'border-transparent hover:border-gray-200',
+                      isLocked && 'grayscale-[0.5] opacity-90',
                     )}
                     onClick={() => {
                       // Allow selection but maybe we want to trigger a modal or just visually show it's premium?
@@ -211,7 +194,7 @@ export function TransformationOptionsPanel({
           </motion.div>
         )}
 
-        {selectedType === "prompt" && (
+        {selectedType === 'prompt' && (
           <motion.div
             key="prompt"
             initial={{ opacity: 0, y: 10 }}
@@ -229,14 +212,12 @@ export function TransformationOptionsPanel({
                 value={prompt}
                 onChange={(e) => onPromptChange(e.target.value.slice(0, 2000))}
               />
-              <div className="text-right text-xs text-muted-foreground">
-                {prompt.length}/2000
-              </div>
+              <div className="text-right text-xs text-muted-foreground">{prompt.length}/2000</div>
             </div>
           </motion.div>
         )}
 
-        {(selectedType === "background" || selectedType === "remove") && (
+        {(selectedType === 'background' || selectedType === 'remove') && (
           <motion.div
             key="context"
             initial={{ opacity: 0, y: 10 }}
@@ -245,12 +226,10 @@ export function TransformationOptionsPanel({
             className="space-y-4"
           >
             <h3 className="text-lg font-medium">
-              {selectedType === "background"
-                ? "Background Settings"
-                : "Removal Settings"}
+              {selectedType === 'background' ? 'Background Settings' : 'Removal Settings'}
             </h3>
 
-            {selectedType === "background" ? (
+            {selectedType === 'background' ? (
               <div className="space-y-4">
                 <Label>Select Background Style</Label>
                 <div className="grid md:grid-cols-4 grid-cols-3 gap-2 mt-2">
@@ -260,10 +239,10 @@ export function TransformationOptionsPanel({
                       <div
                         key={cat.id}
                         className={cn(
-                          "group relative aspect-square rounded-lg cursor-pointer border overflow-hidden transition-all",
+                          'group relative aspect-square rounded-lg cursor-pointer border overflow-hidden transition-all',
                           bgCategory === cat.id
-                            ? "border-primary ring-2 ring-primary/20"
-                            : "border-border hover:border-gray-300",
+                            ? 'border-primary ring-2 ring-primary/20'
+                            : 'border-border hover:border-gray-300',
                         )}
                         onClick={() => {
                           if (!isLocked) {
@@ -272,11 +251,8 @@ export function TransformationOptionsPanel({
                         }}
                         title={cat.label}
                       >
-                        <div
-                          className="w-full h-full"
-                          style={{ background: cat.color }}
-                        />
-                        {cat.id === "custom" && (
+                        <div className="w-full h-full" style={{ background: cat.color }} />
+                        {cat.id === 'custom' && (
                           <div className="absolute inset-0 flex items-center justify-center p-1">
                             <span className="text-[10px] sm:text-base font-medium text-white drop-shadow-md leading-tight text-center">
                               Custom
@@ -299,11 +275,9 @@ export function TransformationOptionsPanel({
                     );
                   })}
                 </div>
-                {bgCategory === "custom" && (
+                {bgCategory === 'custom' && (
                   <div className="space-y-2 animate-in fade-in slide-in-from-top-1">
-                    <Label htmlFor="bg-prompt">
-                      Custom Background Description
-                    </Label>
+                    <Label htmlFor="bg-prompt">Custom Background Description</Label>
                     <Textarea
                       id="bg-prompt"
                       placeholder="e.g. a futuristic cyberpunk city street"
@@ -324,9 +298,7 @@ export function TransformationOptionsPanel({
                   value={prompt}
                   onChange={(e) => onPromptChange(e.target.value.slice(0, 500))}
                 />
-                <div className="text-right text-xs text-muted-foreground">
-                  {prompt.length}/500
-                </div>
+                <div className="text-right text-xs text-muted-foreground">{prompt.length}/500</div>
               </div>
             )}
           </motion.div>

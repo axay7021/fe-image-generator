@@ -1,16 +1,10 @@
-"use client";
+'use client';
 
-import { useAuth } from "@/context/auth-context";
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { useAuth } from '@/context/auth-context';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
   TableBody,
@@ -18,20 +12,26 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Check, X, Loader2, AlertTriangle } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { useRouter } from "next/navigation";
-import { toast } from "react-hot-toast";
-import { createCheckoutSession } from "@/actions/checkout";
-import { PricingPlan } from "@/util/types";
-import { useSubscription } from "@/hooks/use-subscription";
+} from '@/components/ui/table';
+import { Check, X, Loader2, AlertTriangle } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { toast } from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
+import { createCheckoutSession } from '@/actions/checkout';
+import { PricingPlan } from '@/util/types';
+import { useSubscription } from '@/hooks/use-subscription';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { fetchPlans } from '@/queries/plans';
 
-interface PricingSectionProps {
-  plans: PricingPlan[];
-}
+export function PricingSection() {
+  // Fetch plans from cache (hydrated from server)
+  const { data: plans } = useQuery({
+    queryKey: ['plans'],
+    queryFn: fetchPlans,
+    initialData: [],
+    staleTime: 60 * 1000,
+  });
 
-export function PricingSection({ plans }: PricingSectionProps) {
   const { user, getToken } = useAuth();
   const {
     subscription: subscriptionData,
@@ -41,65 +41,77 @@ export function PricingSection({ plans }: PricingSectionProps) {
     activePlanId,
   } = useSubscription();
 
-  const [viewMode, setViewMode] = useState<"usage" | "plans">("plans");
-  const [selectedPlanId, setSelectedPlanId] = useState<string>("");
+  /* 
+     Derived State Logic to avoid useEffect setState anti-patterns
+  */
 
-  useEffect(() => {
-    // Initialize selected plan to popular or first plan
-    if (plans.length > 0 && !selectedPlanId) {
-      const popular = plans.find((p) => p.is_popular) || plans[0];
-      setSelectedPlanId(popular.id);
-    }
-  }, [plans, selectedPlanId]);
+  // 1. View Mode Logic
+  // We track if the user has manually selected a view mode.
+  // If not, we fallback to an automatic mode based on subscription status.
+  const [manualViewMode, setManualViewMode] = useState<'usage' | 'plans' | null>(null);
+
+  // Computed default based on data availability
+  const autoViewMode = activePlanId || billingHistory.length > 0 ? 'usage' : 'plans';
+
+  // Final effective view mode: manual override takes precedence, otherwise auto
+  const viewMode = manualViewMode ?? autoViewMode;
+
+  // Helper to update mode manually (used by buttons)
+  const setViewMode = (mode: 'usage' | 'plans') => setManualViewMode(mode);
+
+  // 2. Selected Plan Logic
+  // Similar approach: Manual selection overrides default calculated plan
+  const [manualSelectedPlanId, setManualSelectedPlanId] = useState<string | null>(null);
+
+  // Calculate default plan (Popular or First)
+  // We use the first plan as fallback if no popular plan is found
+  const defaultPlanId = plans.length > 0 ? plans.find((p) => p.is_popular)?.id || plans[0].id : '';
+
+  const selectedPlanId = manualSelectedPlanId || defaultPlanId;
+
+  // Helper to update selected plan
+  const setSelectedPlanId = (id: string) => setManualSelectedPlanId(id);
 
   const router = useRouter();
 
-  const [hasInitialized, setHasInitialized] = useState(false);
-
-  // Update viewMode based on subscription status (only once)
-  useEffect(() => {
-    if (!isCheckingSubscription && !hasInitialized) {
-      if (activePlanId || billingHistory.length > 0) {
-        setViewMode("usage");
+  const { mutate: subscribe, isPending: isRedirecting } = useMutation({
+    mutationFn: async (planId: string) => {
+      return await createCheckoutSession(planId);
+    },
+    onSuccess: (result) => {
+      if (result.success && result.data?.url) {
+        window.location.href = result.data.url;
       } else {
-        setViewMode("plans");
+        toast.error(result.message || 'Failed to initiate checkout');
       }
-      setHasInitialized(true);
-    }
-  }, [isCheckingSubscription, activePlanId, billingHistory, hasInitialized]);
+    },
+    onError: (error) => {
+      console.error('Checkout exception:', error);
+      toast.error('Something went wrong');
+    },
+  });
 
   const handleSubscribe = async (plan: PricingPlan) => {
-    if (plan.variant === "free") {
+    if (plan.variant === 'free') {
       return;
     }
 
     const token = await getToken();
 
     if (!user || !token) {
-      toast.error("Please sign in to purchase a plan");
-      router.push("/login");
+      toast.error('Please sign in to purchase a plan');
+      router.push('/login');
       return;
     }
 
-    try {
-      const result = await createCheckoutSession(plan.id);
-      if (result.success && result.data?.url) {
-        // eslint-disable-next-line react-hooks/immutability
-        window.location.href = result.data.url;
-      } else {
-        toast.error(result.message || "Failed to initiate checkout");
-      }
-    } catch (error) {
-      console.error("Checkout exception:", error);
-      toast.error("Something went wrong");
-    }
+    subscribe(plan.id);
   };
 
   // Ensure we sort plans by price or a specific order
   const displayPlans = plans.sort((a, b) => {
     // Basic sorting by price string if it contains numbers, simple heuristic
-    const priceA = parseInt(a.price.replace(/[^0-9]/g, "")) || 0;
-    const priceB = parseInt(b.price.replace(/[^0-9]/g, "")) || 0;
+    const priceA = parseInt(a.price.replace(/[^0-9]/g, '')) || 0;
+    const priceB = parseInt(b.price.replace(/[^0-9]/g, '')) || 0;
     return priceA - priceB;
   });
 
@@ -109,15 +121,15 @@ export function PricingSection({ plans }: PricingSectionProps) {
   const percentage = Math.min(Math.round((quotaUsed / totalQuota) * 100), 100);
 
   // Determine colors based on usage
-  let progressColor = "bg-primary";
+  let progressColor = 'bg-primary';
   let showLowCreditWarning = false;
   let showEmptyCreditError = false;
 
   if (percentage >= 100) {
-    progressColor = "bg-red-500";
+    progressColor = 'bg-red-500';
     showEmptyCreditError = true;
   } else if (percentage >= 80) {
-    progressColor = "bg-orange-500";
+    progressColor = 'bg-orange-500';
     showLowCreditWarning = true;
   }
 
@@ -133,41 +145,30 @@ export function PricingSection({ plans }: PricingSectionProps) {
           ) : (
             <>
               <h2 className="text-2xl md:text-4xl font-bold tracking-tight text-[#538ce8]">
-                {viewMode === "usage"
-                  ? "Your Plans"
-                  : "Choose Your Perfect Plan"}
+                {viewMode === 'usage' ? 'Your Plans' : 'Choose Your Perfect Plan'}
               </h2>
               <p className="text-base text-muted-foreground max-w-2xl mx-auto md:mb-auto mb-4">
-                Generate professional-grade AI images instantly. Choose a
-                flexible plan that fits your creative workflow and start
-                building today.
+                Generate professional-grade AI images instantly. Choose a flexible plan that fits
+                your creative workflow and start building today.
               </p>
             </>
           )}
         </div>
 
         {/* Top Right Actions */}
-        {(activePlanId || billingHistory.length > 0) &&
-          !isCheckingSubscription && (
-            <div className="flex justify-end max-w-7xl mx-auto mb-8">
-              {viewMode === "usage" ? (
-                <Button
-                  onClick={() => setViewMode("plans")}
-                  className="rounded-xl"
-                >
-                  Buy More Credits
-                </Button>
-              ) : (
-                <Button
-                  variant="outline"
-                  onClick={() => setViewMode("usage")}
-                  className="rounded-xl"
-                >
-                  Back to Dashboard
-                </Button>
-              )}
-            </div>
-          )}
+        {(activePlanId || billingHistory.length > 0) && !isCheckingSubscription && (
+          <div className="flex justify-end max-w-7xl mx-auto mb-8">
+            {viewMode === 'usage' ? (
+              <Button onClick={() => setViewMode('plans')} className="rounded-xl">
+                Buy More Credits
+              </Button>
+            ) : (
+              <Button variant="outline" onClick={() => setViewMode('usage')} className="rounded-xl">
+                Back to Dashboard
+              </Button>
+            )}
+          </div>
+        )}
 
         {isCheckingSubscription ? (
           <div className="w-full">
@@ -196,7 +197,7 @@ export function PricingSection({ plans }: PricingSectionProps) {
         ) : (
           <>
             {/* Usage Dashboard View */}
-            {viewMode === "usage" && (
+            {viewMode === 'usage' && (
               <>
                 {subscriptionData ? (
                   <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in zoom-in-95 duration-500">
@@ -207,16 +208,16 @@ export function PricingSection({ plans }: PricingSectionProps) {
                             <CardTitle className="text-2xl text-slate-900">
                               {subscriptionData.plan.name}
                             </CardTitle>
-                            {subscriptionData.status !== "active" && (
+                            {subscriptionData.status !== 'active' && (
                               <span
                                 className={cn(
-                                  "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ml-2",
-                                  subscriptionData.status === "quota_exhausted"
-                                    ? "bg-orange-100 text-orange-800"
-                                    : "bg-red-100 text-red-800",
+                                  'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ml-2',
+                                  subscriptionData.status === 'quota_exhausted'
+                                    ? 'bg-orange-100 text-orange-800'
+                                    : 'bg-red-100 text-red-800',
                                 )}
                               >
-                                {subscriptionData.status.replace(/_/g, " ")}
+                                {subscriptionData.status.replace(/_/g, ' ')}
                               </span>
                             )}
                           </div>
@@ -234,16 +235,14 @@ export function PricingSection({ plans }: PricingSectionProps) {
                         {/* Progress Bar */}
                         <div className="space-y-4">
                           <div className="flex justify-between text-sm font-medium">
-                            <span className="text-slate-600">
-                              Usage Progress
-                            </span>
+                            <span className="text-slate-600">Usage Progress</span>
                             <span
                               className={cn(
                                 showEmptyCreditError
-                                  ? "text-red-600"
+                                  ? 'text-red-600'
                                   : showLowCreditWarning
-                                    ? "text-orange-600"
-                                    : "text-primary",
+                                    ? 'text-orange-600'
+                                    : 'text-primary',
                               )}
                             >
                               {percentage}% Used
@@ -252,7 +251,7 @@ export function PricingSection({ plans }: PricingSectionProps) {
                           <div className="h-4 w-full bg-slate-100 rounded-full overflow-hidden">
                             <div
                               className={cn(
-                                "h-full transition-all duration-500 ease-out rounded-full",
+                                'h-full transition-all duration-500 ease-out rounded-full',
                                 progressColor,
                               )}
                               style={{ width: `${percentage}%` }}
@@ -262,8 +261,8 @@ export function PricingSection({ plans }: PricingSectionProps) {
                             <div className="flex items-center gap-2 text-orange-600 bg-orange-50 px-4 py-3 rounded-xl">
                               <AlertTriangle className="w-5 h-5 shrink-0" />
                               <p className="text-sm font-medium">
-                                Your credits are running low. Consider upgrading
-                                or waiorting for the next cycle.
+                                Your credits are running low. Consider upgrading or waiorting for
+                                the next cycle.
                               </p>
                             </div>
                           )}
@@ -271,8 +270,8 @@ export function PricingSection({ plans }: PricingSectionProps) {
                             <div className="flex items-center gap-2 text-red-600 bg-red-50 px-4 py-3 rounded-xl">
                               <AlertTriangle className="w-5 h-5 shrink-0" />
                               <p className="text-sm font-medium">
-                                You have used all your credits. Please buy more
-                                to contotinue generating images.
+                                You have used all your credits. Please buy more to contotinue
+                                generating images.
                               </p>
                             </div>
                           )}
@@ -284,11 +283,9 @@ export function PricingSection({ plans }: PricingSectionProps) {
                   <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in zoom-in-95 duration-500">
                     <Card className="rounded-3xl shadow-xl border-gray-100 overflow-hidden bg-gray-50">
                       <CardContent className="p-8 text-center space-y-4">
-                        <p className="text-lg text-muted-foreground">
-                          No active plan found.
-                        </p>
+                        <p className="text-lg text-muted-foreground">No active plan found.</p>
                         <Button
-                          onClick={() => setViewMode("plans")}
+                          onClick={() => setViewMode('plans')}
                           variant="outline"
                           className="rounded-xl"
                         >
@@ -302,7 +299,7 @@ export function PricingSection({ plans }: PricingSectionProps) {
             )}
 
             {/* Plans Grid View (Desktop) */}
-            {viewMode === "plans" && (
+            {viewMode === 'plans' && (
               <>
                 <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto items-start animate-in fade-in slide-in-from-bottom-8 duration-500">
                   {displayPlans.map((plan) => {
@@ -313,10 +310,10 @@ export function PricingSection({ plans }: PricingSectionProps) {
                       <div
                         key={plan.id}
                         className={cn(
-                          "relative w-full rounded-3xl transition-all duration-300 flex flex-col",
+                          'relative w-full rounded-3xl transition-all duration-300 flex flex-col',
                           isPopular
-                            ? "shadow-2xl bg-[#538CE8] z-10 pt-10 px-[3px] pb-[3px]"
-                            : "bg-white shadow-xl border border-blue-200 hover:scale-[1.02] hover:shadow-blue-500/20 p-8 mt-9",
+                            ? 'shadow-2xl bg-[#538CE8] z-10 pt-10 px-[3px] pb-[3px]'
+                            : 'bg-white shadow-xl border border-blue-200 hover:scale-[1.02] hover:shadow-blue-500/20 p-8 mt-9',
                         )}
                       >
                         {isPopular && (
@@ -327,10 +324,10 @@ export function PricingSection({ plans }: PricingSectionProps) {
 
                         <div
                           className={cn(
-                            "flex flex-col flex-1",
+                            'flex flex-col flex-1',
                             isPopular
-                              ? "bg-linear-to-b from-[#FFFFFF] to-[#E5EFFF] p-8 pt-6 rounded-[22px]"
-                              : "bg-white",
+                              ? 'bg-linear-to-b from-[#FFFFFF] to-[#E5EFFF] p-8 pt-6 rounded-[22px]'
+                              : 'bg-white',
                           )}
                         >
                           <div className="mb-8 space-y-4 text-left">
@@ -342,7 +339,7 @@ export function PricingSection({ plans }: PricingSectionProps) {
                                 {plan.name}
                               </h3>
                               {/* Optional Badge */}
-                              {plan.name.toUpperCase().includes("PRO") && (
+                              {plan.name.toUpperCase().includes('PRO') && (
                                 <span className="bg-blue-100 text-blue-700 text-xs px-3 py-1 rounded-full font-bold tracking-wide">
                                   PRO
                                 </span>
@@ -351,9 +348,7 @@ export function PricingSection({ plans }: PricingSectionProps) {
 
                             <div className="flex items-baseline gap-1">
                               <span className="text-4xl font-bold text-black">
-                                {plan.price.includes("$")
-                                  ? plan.price.split(" ")[0]
-                                  : plan.price}
+                                {plan.price.includes('$') ? plan.price.split(' ')[0] : plan.price}
                               </span>
                             </div>
                             <p className="text-sm text-muted-foreground leading-relaxed h-10">
@@ -364,16 +359,13 @@ export function PricingSection({ plans }: PricingSectionProps) {
                           <div className="flex-1 mb-8">
                             <ul className="space-y-4 px-1">
                               {plan.features.map((feature, idx) => (
-                                <li
-                                  key={idx}
-                                  className="flex items-start gap-3"
-                                >
+                                <li key={idx} className="flex items-start gap-3">
                                   <div
                                     className={cn(
-                                      "rounded-full p-1 shrink-0 mt-0.5",
+                                      'rounded-full p-1 shrink-0 mt-0.5',
                                       feature.included
-                                        ? "bg-green-100 text-green-600"
-                                        : "bg-slate-100 text-slate-400",
+                                        ? 'bg-green-100 text-green-600'
+                                        : 'bg-slate-100 text-slate-400',
                                     )}
                                   >
                                     {feature.included ? (
@@ -384,10 +376,10 @@ export function PricingSection({ plans }: PricingSectionProps) {
                                   </div>
                                   <span
                                     className={cn(
-                                      "text-sm",
+                                      'text-sm',
                                       feature.included
-                                        ? "text-slate-700 font-medium"
-                                        : "text-slate-400 line-through",
+                                        ? 'text-slate-700 font-medium'
+                                        : 'text-slate-400 line-through',
                                     )}
                                   >
                                     {feature.name}
@@ -400,15 +392,15 @@ export function PricingSection({ plans }: PricingSectionProps) {
                           <div className="space-y-3 mt-auto">
                             <Button
                               onClick={() => handleSubscribe(plan)}
-                              disabled={isCheckingSubscription}
+                              disabled={isCheckingSubscription || isRedirecting}
                               className={cn(
-                                "w-full h-12 rounded-xl text-lg font-semibold transition-all duration-300 shadow-md",
+                                'w-full h-12 rounded-xl text-lg font-semibold transition-all duration-300 shadow-md',
                                 isPopular
-                                  ? "bg-[#538CE8] hover:bg-[#538CE8]/90 text-white shadow-[#538CE8]/20"
-                                  : "bg-primary hover:opacity-90 text-white shadow-blue-500/20",
+                                  ? 'bg-[#538CE8] hover:bg-[#538CE8]/90 text-white shadow-[#538CE8]/20'
+                                  : 'bg-primary hover:opacity-90 text-white shadow-blue-500/20',
                               )}
                             >
-                              {isCheckingSubscription ? (
+                              {isCheckingSubscription || isRedirecting ? (
                                 <>
                                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                   Checking...
@@ -435,10 +427,10 @@ export function PricingSection({ plans }: PricingSectionProps) {
                         key={plan.id}
                         onClick={() => setSelectedPlanId(plan.id)}
                         className={cn(
-                          "relative rounded-2xl border-2 p-4 transition-all duration-200 cursor-pointer overflow-hidden",
+                          'relative rounded-2xl border-2 p-4 transition-all duration-200 cursor-pointer overflow-hidden',
                           isSelected
-                            ? "border-[#538CE8] bg-blue-50/50 shadow-md ring-1 ring-[#538CE8]/20"
-                            : "border-gray-100 bg-white shadow-sm active:scale-[0.98]",
+                            ? 'border-[#538CE8] bg-blue-50/50 shadow-md ring-1 ring-[#538CE8]/20'
+                            : 'border-gray-100 bg-white shadow-sm active:scale-[0.98]',
                         )}
                       >
                         {isPopular && (
@@ -450,32 +442,24 @@ export function PricingSection({ plans }: PricingSectionProps) {
                           {/* Radio Indicator */}
                           <div
                             className={cn(
-                              "w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors",
+                              'w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors',
                               isSelected
-                                ? "border-[#538CE8] bg-[#538CE8]"
-                                : "border-gray-300 bg-transparent",
+                                ? 'border-[#538CE8] bg-[#538CE8]'
+                                : 'border-gray-300 bg-transparent',
                             )}
                           >
-                            {isSelected && (
-                              <Check className="w-3.5 h-3.5 text-white stroke-3" />
-                            )}
+                            {isSelected && <Check className="w-3.5 h-3.5 text-white stroke-3" />}
                           </div>
 
                           {/* Content */}
                           <div className="flex-1">
                             <div className="flex justify-between items-center mb-1">
-                              <h3 className="font-bold text-gray-900 text-lg">
-                                {plan.name}
-                              </h3>
+                              <h3 className="font-bold text-gray-900 text-lg">{plan.name}</h3>
                               <span className="font-bold text-lg text-gray-900">
-                                {plan.price.includes("$")
-                                  ? plan.price.split(" ")[0]
-                                  : plan.price}
+                                {plan.price.includes('$') ? plan.price.split(' ')[0] : plan.price}
                               </span>
                             </div>
-                            <p className="text-sm text-gray-500 leading-tight">
-                              {plan.subtitle}
-                            </p>
+                            <p className="text-sm text-gray-500 leading-tight">{plan.subtitle}</p>
                           </div>
                         </div>
                       </div>
@@ -487,22 +471,19 @@ export function PricingSection({ plans }: PricingSectionProps) {
                 <div className="md:hidden mt-8">
                   <Button
                     onClick={() => {
-                      const selectedPlan = plans.find(
-                        (p) => p.id === selectedPlanId,
-                      );
+                      const selectedPlan = plans.find((p) => p.id === selectedPlanId);
                       if (selectedPlan) handleSubscribe(selectedPlan);
                     }}
-                    disabled={isCheckingSubscription || !selectedPlanId}
+                    disabled={isCheckingSubscription || !selectedPlanId || isRedirecting}
                     className="w-full h-14 rounded-xl text-lg font-bold bg-[#538CE8] hover:bg-[#538CE8]/90 text-white shadow-lg shadow-blue-500/25"
                   >
-                    {isCheckingSubscription ? (
+                    {isCheckingSubscription || isRedirecting ? (
                       <>
                         <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                         Processing...
                       </>
                     ) : (
-                      plans.find((p) => p.id === selectedPlanId)?.action ||
-                      "Subscribe"
+                      plans.find((p) => p.id === selectedPlanId)?.action || 'Subscribe'
                     )}
                   </Button>
                 </div>
@@ -510,14 +491,12 @@ export function PricingSection({ plans }: PricingSectionProps) {
             )}
 
             {/* Billing History Section */}
-            {viewMode === "usage" && billingHistory.length > 0 && (
-              <div className="max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-6 duration-700 delay-200 md:mt-24 mt-12">
-                <Card className="rounded-3xl shadow-lg border-none bg-white/50 backdrop-blur-sm">
+            {viewMode === 'usage' && billingHistory.length > 0 && (
+              <div className="max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-6 duration-700 delay-200 md:mt-24 mt-12 ">
+                <Card className="rounded-3xl shadow-lg bg-white/50 backdrop-blur-sm border-blue-100 border">
                   <CardHeader>
                     <CardTitle className="text-2xl">Billing History</CardTitle>
-                    <CardDescription>
-                      View your recent payments and invoices
-                    </CardDescription>
+                    <CardDescription>View your recent payments and invoices</CardDescription>
                   </CardHeader>
                   <CardContent>
                     {isLoadingHistory ? (
@@ -538,9 +517,9 @@ export function PricingSection({ plans }: PricingSectionProps) {
                     ) : (
                       <>
                         {/* Desktop Table View */}
-                        <div className="hidden md:block rounded-2xl border overflow-hidden bg-white">
+                        <div className="hidden md:block rounded-2xl border overflow-hidden bg-white border-gray-100">
                           <Table>
-                            <TableHeader className="bg-slate-50">
+                            <TableHeader className="bg-slate-50 ">
                               <TableRow>
                                 <TableHead>Purchased Date</TableHead>
                                 <TableHead>Plan</TableHead>
@@ -555,24 +534,20 @@ export function PricingSection({ plans }: PricingSectionProps) {
                                   className="hover:bg-slate-50/50 transition-colors"
                                 >
                                   <TableCell className="font-medium">
-                                    {new Date(
-                                      historyItem.period_start,
-                                    ).toLocaleDateString()}
+                                    {new Date(historyItem.period_start).toLocaleDateString()}
                                   </TableCell>
                                   <TableCell>{historyItem.plan.name}</TableCell>
-                                  <TableCell>
-                                    ${historyItem.plan.price_usd}
-                                  </TableCell>
+                                  <TableCell>${historyItem.plan.price_usd}</TableCell>
                                   <TableCell>
                                     <span
                                       className={cn(
-                                        "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize",
-                                        historyItem.status === "active"
-                                          ? "bg-green-100 text-green-700"
-                                          : "bg-yellow-100 text-yellow-800",
+                                        'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize',
+                                        historyItem.status === 'active'
+                                          ? 'bg-green-100 text-green-700'
+                                          : 'bg-yellow-100 text-yellow-800',
                                       )}
                                     >
-                                      {historyItem.status.replace("_", " ")}
+                                      {historyItem.status.replace('_', ' ')}
                                     </span>
                                   </TableCell>
                                 </TableRow>
@@ -590,43 +565,31 @@ export function PricingSection({ plans }: PricingSectionProps) {
                             >
                               <div className="flex justify-between items-start">
                                 <div>
-                                  <p className="text-sm text-muted-foreground">
-                                    Plan
-                                  </p>
-                                  <p className="font-semibold text-lg">
-                                    {historyItem.plan.name}
-                                  </p>
+                                  <p className="text-sm text-muted-foreground">Plan</p>
+                                  <p className="font-semibold text-lg">{historyItem.plan.name}</p>
                                 </div>
                                 <span
                                   className={cn(
-                                    "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize",
-                                    historyItem.status === "active"
-                                      ? "bg-green-100 text-green-700"
-                                      : "bg-yellow-100 text-yellow-800",
+                                    'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize',
+                                    historyItem.status === 'active'
+                                      ? 'bg-green-100 text-green-700'
+                                      : 'bg-yellow-100 text-yellow-800',
                                   )}
                                 >
-                                  {historyItem.status.replace("_", " ")}
+                                  {historyItem.status.replace('_', ' ')}
                                 </span>
                               </div>
 
                               <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                  <p className="text-sm text-muted-foreground">
-                                    Date
-                                  </p>
+                                  <p className="text-sm text-muted-foreground">Date</p>
                                   <p className="font-medium">
-                                    {new Date(
-                                      historyItem.period_start,
-                                    ).toLocaleDateString()}
+                                    {new Date(historyItem.period_start).toLocaleDateString()}
                                   </p>
                                 </div>
                                 <div>
-                                  <p className="text-sm text-muted-foreground">
-                                    Amount
-                                  </p>
-                                  <p className="font-medium">
-                                    ${historyItem.plan.price_usd}
-                                  </p>
+                                  <p className="text-sm text-muted-foreground">Amount</p>
+                                  <p className="font-medium">${historyItem.plan.price_usd}</p>
                                 </div>
                               </div>
                             </div>

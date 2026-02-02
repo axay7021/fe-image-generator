@@ -1,4 +1,4 @@
-"use server";
+'use server';
 
 export interface CheckoutResponse {
   success: boolean;
@@ -8,38 +8,27 @@ export interface CheckoutResponse {
   message?: string;
 }
 
-import { auth } from "@clerk/nextjs/server";
-import { headers } from "next/headers";
+import apiClient from '@/lib/api-client';
+import axios from 'axios';
 
-export async function createCheckoutSession(
-  planId: string,
-): Promise<CheckoutResponse> {
+interface CheckoutAPIResponse {
+  data?: {
+    url: string;
+  };
+  message?: string;
+  error?: {
+    message: string;
+  };
+}
+
+export async function createCheckoutSession(planId: string): Promise<CheckoutResponse> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
-    if (!baseUrl) {
-      console.error("NEXT_PUBLIC_BASE_URL is not set");
-      return { success: false, message: "Configuration error" };
-    }
+    const response = await apiClient.post<CheckoutAPIResponse>(`/checkout/${planId}`);
 
-    // Get Clerk auth token
-    const { getToken } = await auth();
-    const token = await getToken();
+    console.log({ response });
+    const data = response.data;
 
-    // Get IP
-    const headersList = await headers();
-    const ip = headersList.get("x-forwarded-for") || "127.0.0.1";
-
-    const response = await fetch(`${baseUrl}/checkout/${planId}`, {
-      method: "POST",
-      headers: {
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        "Content-Type": "application/json",
-        "X-Forwarded-For": ip,
-      },
-    });
-    const data = await response.json();
-
-    if (response.ok && data.data?.url) {
+    if (response.status >= 200 && response.status < 300 && data.data?.url) {
       return {
         success: true,
         data: {
@@ -48,14 +37,26 @@ export async function createCheckoutSession(
         message: data.message,
       };
     } else {
-      console.error("Checkout API error:", data);
+      // Should not happen if non-2xx throws, but just in case logic flows differently
+      console.error('Checkout API error:', data);
       return {
         success: false,
-        message: data.error.message || "Failed to initiate checkout",
+        message: data.error?.message || 'Failed to initiate checkout',
       };
     }
-  } catch (error) {
-    console.error("Checkout action exception:", error);
-    return { success: false, message: "Something went wrong" };
+  } catch (error: unknown) {
+    console.error('Checkout action exception:', error);
+    if (axios.isAxiosError(error)) {
+      const errorData = error.response?.data;
+      return {
+        success: false,
+        message:
+          errorData?.error?.message ||
+          errorData?.message ||
+          error.message ||
+          'Failed to initiate checkout',
+      };
+    }
+    return { success: false, message: 'Something went wrong' };
   }
 }

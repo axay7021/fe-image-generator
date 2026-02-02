@@ -1,44 +1,51 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useMutation } from "@tanstack/react-query";
-import { motion, AnimatePresence } from "framer-motion";
-import { useUser } from "@clerk/nextjs";
-import { generateImageAction } from "@/actions/generate-image";
-import { Header } from "@/components/layout/Header";
-import { PhotoUploadCard } from "@/components/home/PhotoUploadCard";
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useMutation } from '@tanstack/react-query';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useUser } from '@clerk/nextjs';
+import { generateImageAction } from '@/actions/generate-image';
+import { Header } from '@/components/layout/Header';
+import { PhotoUploadCard } from '@/components/home/PhotoUploadCard';
 import {
   TransformationSelector,
   TransformationType,
   PassportMode,
   LINKEDIN_STYLES,
   BACKGROUND_CATEGORIES,
-} from "@/components/home/TransformationSelector";
-import { TransformationOptionsPanel } from "@/components/home/TransformationOptionsPanel";
-import { ResultsPanel } from "@/components/home/ResultsPanel";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, Wand2 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { FeatureSection } from "@/components/home/FeatureSection";
-import { HowItWorks } from "@/components/home/HowItWorks";
-import { FAQSection } from "@/components/home/FAQ";
-import { toast } from "react-hot-toast";
-import { useSubscription } from "@/hooks/use-subscription";
-import { usePersistentGenerationState } from "@/hooks/use-persistent-state";
+} from '@/components/home/TransformationSelector';
+import { TransformationOptionsPanel } from '@/components/home/TransformationOptionsPanel';
+import { ResultsPanel } from '@/components/home/ResultsPanel';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft, Wand2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { FeatureSection } from '@/components/home/FeatureSection';
+import { HowItWorks } from '@/components/home/HowItWorks';
+import { FAQSection } from '@/components/home/FAQ';
+import { toast } from 'react-hot-toast';
+import { useSubscription } from '@/hooks/use-subscription';
+import { usePersistentGenerationState } from '@/hooks/use-persistent-state';
 
 export default function Home() {
   const router = useRouter();
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [selectedType, setSelectedType] = useState<TransformationType | null>(
-    null,
-  );
+  const [selectedType, setSelectedType] = useState<TransformationType | null>(null);
   const [prompts, setPrompts] = useState<Record<string, string>>({});
   const [resultUrl, setResultUrl] = useState<string | null>(null);
   const [step, setStep] = useState(1);
 
   // Persistent State Hook
   const { saveState, loadState, clearState } = usePersistentGenerationState();
+
+  // New States for LinkedIn Feature
+  const [selectedStyle, setSelectedStyle] = useState<string>(LINKEDIN_STYLES[0].id);
+
+  // Advanced Passport Options State
+  const [passportMode, setPassportMode] = useState<PassportMode>('standard');
+  const [suitColor, setSuitColor] = useState('Navy Blue');
+  const [tieColor, setTieColor] = useState('Red');
+  const [bgCategory, setBgCategory] = useState<string>(BACKGROUND_CATEGORIES[0].id);
 
   // Load state on mount if user is just logging in
   const { isSignedIn, isLoaded: isAuthLoaded } = useUser();
@@ -52,8 +59,7 @@ export default function Home() {
         if (savedState.selectedType) setSelectedType(savedState.selectedType);
         if (savedState.prompts) setPrompts(savedState.prompts);
         if (savedState.step) setStep(savedState.step);
-        if (savedState.selectedStyle)
-          setSelectedStyle(savedState.selectedStyle);
+        if (savedState.selectedStyle) setSelectedStyle(savedState.selectedStyle);
         if (savedState.passportMode) setPassportMode(savedState.passportMode);
         if (savedState.suitColor) setSuitColor(savedState.suitColor);
         if (savedState.tieColor) setTieColor(savedState.tieColor);
@@ -73,12 +79,12 @@ export default function Home() {
   // Default to Passport on Desktop (lg breakpoint)
   useEffect(() => {
     if (window.innerWidth >= 1024) {
-      setTimeout(() => setSelectedType("passport"), 0);
+      setTimeout(() => setSelectedType('passport'), 0);
     }
   }, []);
 
   // Helper to get/set current prompt
-  const currentPrompt = selectedType ? prompts[selectedType] || "" : "";
+  const currentPrompt = selectedType ? prompts[selectedType] || '' : '';
   const handlePromptChange = (value: string) => {
     if (!selectedType) return;
     setPrompts((prev) => ({
@@ -87,19 +93,6 @@ export default function Home() {
     }));
   };
 
-  // New States for LinkedIn Feature
-  const [selectedStyle, setSelectedStyle] = useState<string>(
-    LINKEDIN_STYLES[0].id,
-  );
-
-  // Advanced Passport Options State
-  const [passportMode, setPassportMode] = useState<PassportMode>("standard");
-  const [suitColor, setSuitColor] = useState("Navy Blue");
-  const [tieColor, setTieColor] = useState("Red");
-  const [bgCategory, setBgCategory] = useState<string>(
-    BACKGROUND_CATEGORIES[0].id,
-  );
-
   // const { isSignedIn } = useUser(); // Removed duplicate declaration
 
   const { refreshSubscription } = useSubscription();
@@ -107,30 +100,30 @@ export default function Home() {
   const { mutate, isPending } = useMutation({
     mutationFn: async () => {
       const formData = new FormData();
-      if (selectedImage) formData.append("image", selectedImage);
+      if (selectedImage) formData.append('image', selectedImage);
 
-      if (!selectedType) throw new Error("Please select a transformation type");
+      if (!selectedType) throw new Error('Please select a transformation type');
 
-      if (selectedType === "linkedin") {
-        formData.append("type", "linkedin-profile"); // Backend implies this or handling logic
-        formData.append("action", "linkedin-profile"); // Just to be safe based on request
-        formData.append("style", selectedStyle);
-      } else if (selectedType === "background") {
-        formData.append("type", "background");
-        formData.append("category", bgCategory);
-        if (bgCategory === "custom") {
-          formData.append("prompt", currentPrompt);
+      if (selectedType === 'linkedin') {
+        formData.append('type', 'linkedin-profile'); // Backend implies this or handling logic
+        formData.append('action', 'linkedin-profile'); // Just to be safe based on request
+        formData.append('style', selectedStyle);
+      } else if (selectedType === 'background') {
+        formData.append('type', 'background');
+        formData.append('category', bgCategory);
+        if (bgCategory === 'custom') {
+          formData.append('prompt', currentPrompt);
         }
       } else {
-        formData.append("type", selectedType);
-        formData.append("prompt", currentPrompt);
+        formData.append('type', selectedType);
+        formData.append('prompt', currentPrompt);
 
         // Passport Specific Data
-        if (selectedType === "passport") {
-          formData.append("passport_mode", passportMode);
-          if (passportMode === "suit") {
-            formData.append("suit_color", suitColor);
-            formData.append("tie_color", tieColor);
+        if (selectedType === 'passport') {
+          formData.append('passport_mode', passportMode);
+          if (passportMode === 'suit') {
+            formData.append('suit_color', suitColor);
+            formData.append('tie_color', tieColor);
           }
         }
       }
@@ -139,7 +132,7 @@ export default function Home() {
     },
     onSuccess: async (data) => {
       if (!data.success) {
-        if (data.error?.includes("Daily limit reached")) {
+        if (data.error?.includes('Daily limit reached')) {
           if (!isSignedIn) {
             // SAVE STATE BEFORE REDIRECT
             await saveState({
@@ -155,11 +148,11 @@ export default function Home() {
               timestamp: Date.now(),
             });
 
-            router.push("/login");
-            toast.error("Please login to generate more images");
+            router.push('/login');
+            toast.error('Please login to generate more images');
           } else {
             toast.error(
-              "Your plan quota is full. Please upgrade your plan to generate more images",
+              'Your plan quota is full. Please upgrade your plan to generate more images',
             );
           }
           return;
@@ -171,7 +164,7 @@ export default function Home() {
       await refreshSubscription();
       setResultUrl(data.imageUrl!);
       setResultUrl(data.imageUrl!);
-      toast.success("Image generated successfully!");
+      toast.success('Image generated successfully!');
       // Clear state on success to avoid stale restoration later
       await clearState();
     },
@@ -199,9 +192,9 @@ export default function Home() {
   useEffect(() => {
     if (showResults && window.innerWidth < 1024) {
       setTimeout(() => {
-        const resultsElement = document.getElementById("results-section");
+        const resultsElement = document.getElementById('results-section');
         if (resultsElement) {
-          resultsElement.scrollIntoView({ behavior: "smooth", block: "start" });
+          resultsElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
       }, 100);
     }
@@ -214,9 +207,9 @@ export default function Home() {
         className="absolute top-0 left-0 w-full h-[25%] z-0 pointer-events-none"
         style={{
           backgroundImage: "url('/hero-bg-design.png')",
-          backgroundSize: "cover",
-          backgroundPosition: "top center",
-          backgroundRepeat: "no-repeat",
+          backgroundSize: 'cover',
+          backgroundPosition: 'top center',
+          backgroundRepeat: 'no-repeat',
         }}
       />
 
@@ -236,15 +229,15 @@ export default function Home() {
 
             <motion.div
               layout
-              transition={{ type: "spring", bounce: 0.1, duration: 0.8 }}
+              transition={{ type: 'spring', bounce: 0.1, duration: 0.8 }}
               className="mx-auto max-w-6xl transition-all duration-700 ease-in-out mb-12 md:mb-24"
             >
               <div className="backdrop-blur-xl p-4 md:p-8 rounded-2xl shadow-2xl border-2 border-transparent bg-origin-border [background-clip:padding-box,border-box] bg-[linear-gradient(to_right,#F1F6FF,#FFFFFF),linear-gradient(to_right,#E6E6FA,#D6E7FF)] ring-1 ring-black/5">
                 {/* Stepper Header (Mobile Only) */}
                 <div
                   className={cn(
-                    "flex items-center mb-6 lg:hidden relative",
-                    step === 1 ? "justify-center" : "justify-between",
+                    'flex items-center mb-6 lg:hidden relative',
+                    step === 1 ? 'justify-center' : 'justify-between',
                   )}
                 >
                   {/* Back Button (Left - Only visible step > 1) */}
@@ -262,48 +255,48 @@ export default function Home() {
                   {/* Stepper Indicators */}
                   <div
                     className={cn(
-                      "flex items-center gap-2 transition-all duration-300",
-                      step === 1 ? "flex-1 justify-center" : "",
+                      'flex items-center gap-2 transition-all duration-300',
+                      step === 1 ? 'flex-1 justify-center' : '',
                     )}
                   >
                     <div
                       className={cn(
-                        "w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300",
+                        'w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300',
                         step >= 1
-                          ? "bg-[#538CE8] text-white shadow-md shadow-blue-500/20"
-                          : "bg-gray-100 text-gray-400",
+                          ? 'bg-[#538CE8] text-white shadow-md shadow-blue-500/20'
+                          : 'bg-gray-100 text-gray-400',
                       )}
                     >
                       1
                     </div>
                     <div
                       className={cn(
-                        "w-6 h-0.5 transition-colors duration-300",
-                        step >= 2 ? "bg-[#538CE8]" : "bg-gray-200",
+                        'w-6 h-0.5 transition-colors duration-300',
+                        step >= 2 ? 'bg-[#538CE8]' : 'bg-gray-200',
                       )}
                     />
                     <div
                       className={cn(
-                        "w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300",
+                        'w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300',
                         step >= 2
-                          ? "bg-[#538CE8] text-white shadow-md shadow-blue-500/20"
-                          : "bg-gray-100 text-gray-400",
+                          ? 'bg-[#538CE8] text-white shadow-md shadow-blue-500/20'
+                          : 'bg-gray-100 text-gray-400',
                       )}
                     >
                       2
                     </div>
                     <div
                       className={cn(
-                        "w-6 h-0.5 transition-colors duration-300",
-                        step >= 3 ? "bg-[#538CE8]" : "bg-gray-200",
+                        'w-6 h-0.5 transition-colors duration-300',
+                        step >= 3 ? 'bg-[#538CE8]' : 'bg-gray-200',
                       )}
                     />
                     <div
                       className={cn(
-                        "w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300",
+                        'w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300',
                         step >= 3
-                          ? "bg-[#538CE8] text-white shadow-md shadow-blue-500/20"
-                          : "bg-gray-100 text-gray-400",
+                          ? 'bg-[#538CE8] text-white shadow-md shadow-blue-500/20'
+                          : 'bg-gray-100 text-gray-400',
                       )}
                     >
                       3
@@ -344,9 +337,7 @@ export default function Home() {
                         disabled={!selectedImage || isPending}
                       >
                         {isPending ? (
-                          <span className="flex items-center gap-2">
-                            Generating Magic...
-                          </span>
+                          <span className="flex items-center gap-2">Generating Magic...</span>
                         ) : (
                           <span className="flex items-center gap-2">
                             <Wand2 className="h-5 w-5" /> Generate Magic
@@ -435,14 +426,10 @@ export default function Home() {
                               size="lg"
                               className="w-full text-lg h-14 bg-[#538CE8] hover:bg-[#538CE8]/80 cursor-pointer shadow-lg shadow-blue-500/25 transition-all hover:scale-[1.02]"
                               onClick={handleGenerate}
-                              disabled={
-                                !selectedImage || !selectedType || isPending
-                              }
+                              disabled={!selectedImage || !selectedType || isPending}
                             >
                               {isPending ? (
-                                <span className="flex items-center gap-2">
-                                  Generating Magic...
-                                </span>
+                                <span className="flex items-center gap-2">Generating Magic...</span>
                               ) : (
                                 <span className="flex items-center gap-2">
                                   <Wand2 className="h-5 w-5" /> Generate Magic
@@ -459,11 +446,11 @@ export default function Home() {
                   <div
                     id="results-section"
                     className={cn(
-                      "h-full border-l-0 lg:border-l border-border/50 pl-0 lg:pl-8 lg:min-h-[400px]",
+                      'h-full border-l-0 lg:border-l border-border/50 pl-0 lg:pl-8 lg:min-h-[400px]',
                       // Mobile: Hide unless showing results (which overrides steps) OR desktop specific options
                       // Since we handled Step 3 Options in the left column for Mobile, this column is mostly for Desktop Options OR Results.
-                      !showResults && "hidden lg:block",
-                      showResults && "block", // Always show if results are ready
+                      !showResults && 'hidden lg:block',
+                      showResults && 'block', // Always show if results are ready
                     )}
                   >
                     <AnimatePresence mode="wait">
@@ -514,12 +501,9 @@ export default function Home() {
                             ) : (
                               <div className="flex items-center justify-center h-[200px] bg-muted/20 rounded-xl border-2 border-dashed border-muted-foreground/20">
                                 <div className="text-center text-muted-foreground p-6">
-                                  <p className="font-medium">
-                                    No Transformation Selected
-                                  </p>
+                                  <p className="font-medium">No Transformation Selected</p>
                                   <p className="text-sm">
-                                    Select a transformation type on the left to
-                                    continue.
+                                    Select a transformation type on the left to continue.
                                   </p>
                                 </div>
                               </div>

@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback } from 'react';
 import {
   saveImageToDB,
   getImageFromDB,
@@ -7,10 +7,19 @@ import {
   getSettingsFromLocal,
   clearSettingsFromLocal,
   GenerationState,
-} from "@/lib/storage";
+} from '@/lib/storage';
 
 export function usePersistentGenerationState() {
   const [isRestoring, setIsRestoring] = useState(false);
+
+  const clearState = useCallback(async () => {
+    try {
+      await clearImageFromDB();
+      clearSettingsFromLocal();
+    } catch (error) {
+      console.error('Failed to clear persistent state:', error);
+    }
+  }, []);
 
   const saveState = useCallback(async (state: GenerationState) => {
     try {
@@ -20,10 +29,11 @@ export function usePersistentGenerationState() {
       }
 
       // 2. Save Metadata to LocalStorage (exclude image)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { image, ...settings } = state;
       saveSettingsToLocal(settings);
     } catch (error) {
-      console.error("Failed to save persistent state:", error);
+      console.error('Failed to save persistent state:', error);
     }
   }, []);
 
@@ -43,21 +53,12 @@ export function usePersistentGenerationState() {
       const image = await getImageFromDB();
       return { ...settings, image };
     } catch (error) {
-      console.error("Failed to load persistent state:", error);
+      console.error('Failed to load persistent state:', error);
       return null;
     } finally {
       setIsRestoring(false);
     }
-  }, []);
-
-  const clearState = useCallback(async () => {
-    try {
-      await clearImageFromDB();
-      clearSettingsFromLocal();
-    } catch (error) {
-      console.error("Failed to clear persistent state:", error);
-    }
-  }, []);
+  }, [clearState]);
 
   return {
     saveState,

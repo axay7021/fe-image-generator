@@ -1,46 +1,67 @@
-"use client";
+'use client';
 
-import { useCallback, useEffect, useState } from "react";
-import { useDropzone } from "react-dropzone";
-import { Card, CardContent } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
-import { UploadCloud, X } from "lucide-react";
-import Image from "next/image";
-import { toast } from "react-hot-toast";
-import { validateImage } from "@/app/actions/image";
+import { useCallback, useEffect, useState } from 'react';
+import { useDropzone } from 'react-dropzone';
+import { Card, CardContent } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
+import { UploadCloud, X } from 'lucide-react';
+import Image from 'next/image';
+import { toast } from 'react-hot-toast';
+import { useMutation } from '@tanstack/react-query';
+import { validateImage } from '@/actions/image';
 
 interface PhotoUploadCardProps {
   onImageSelect: (file: File | null) => void;
   selectedImage: File | null;
 }
 
-export function PhotoUploadCard({
-  onImageSelect,
-  selectedImage,
-}: PhotoUploadCardProps) {
+export function PhotoUploadCard({ onImageSelect, selectedImage }: PhotoUploadCardProps) {
   const [preview, setPreview] = useState<string | null>(null);
 
   // Sync preview with selectedImage prop on mount or change
   useEffect(() => {
     let isMounted = true;
+    let objectUrl: string | null = null;
+
     if (selectedImage) {
-      const objectUrl = URL.createObjectURL(selectedImage);
+      objectUrl = URL.createObjectURL(selectedImage);
       setTimeout(() => {
         if (isMounted) setPreview(objectUrl);
       }, 0);
-      return () => {
-        isMounted = false;
-        URL.revokeObjectURL(objectUrl);
-      };
     } else {
       setTimeout(() => {
         if (isMounted) setPreview(null);
       }, 0);
-      return () => {
-        isMounted = false;
-      };
     }
+
+    return () => {
+      isMounted = false;
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
   }, [selectedImage]);
+
+  const { mutate: validate } = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('file', file);
+      return await validateImage(formData);
+    },
+    onSuccess: (data, file) => {
+      if (data.valid) {
+        onImageSelect(file);
+        setPreview(URL.createObjectURL(file));
+      } else {
+        console.log({ data });
+        toast.error(data.error.message || 'Invalid image');
+      }
+    },
+    onError: (error) => {
+      console.error(error);
+      toast.error('Validation failed');
+    },
+  });
 
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
@@ -49,38 +70,34 @@ export function PhotoUploadCard({
 
         // Check for HEIC/HEIF
         if (
-          file.name.toLowerCase().endsWith(".heic") ||
-          file.type === "image/heic" ||
-          file.type === "image/heif"
+          file.name.toLowerCase().endsWith('.heic') ||
+          file.type === 'image/heic' ||
+          file.type === 'image/heif'
         ) {
-          toast.error(
-            "HEIC format is not supported. Please use PNG, JPG, or WebP.",
-          );
+          toast.error('HEIC format is not supported. Please use PNG, JPG, or WebP.');
           return;
         }
 
-        const validToastId = toast.loading("Validating image...");
-
+        const toastId = toast.loading('Validating image...');
         try {
-          const formData = new FormData();
-          formData.append("file", file);
-
-          const data = await validateImage(formData);
-
-          if (data.valid) {
-            toast.dismiss(validToastId);
-            onImageSelect(file);
-            setPreview(URL.createObjectURL(file));
-          } else {
-            toast.error(data.message || "Invalid image", { id: validToastId });
-          }
-        } catch (error) {
-          console.error(error);
-          toast.error("Validation failed", { id: validToastId });
+          await validate(file, {
+            onSuccess: (data) => {
+              toast.dismiss(toastId);
+              if (!data.valid) {
+                toast.error(data.error.message || 'Invalid image');
+              }
+            },
+            onError: () => {
+              toast.dismiss(toastId);
+              toast.error('Validation failed');
+            },
+          });
+        } catch {
+          toast.dismiss(toastId);
         }
       }
     },
-    [onImageSelect],
+    [validate],
   );
 
   const clearImage = (e: React.MouseEvent) => {
@@ -95,19 +112,19 @@ export function PhotoUploadCard({
       const error = fileRejections[0]?.errors[0];
       if (error) {
         // Custom message for file type errors
-        if (error.code === "file-invalid-type") {
-          toast.error("File type not supported. Please use PNG, JPG, or WebP.");
-        } else if (error.code === "file-too-large") {
-          toast.error("File is too large. Maximum size is 10MB.");
-        } else if (error.code === "too-many-files") {
-          toast.error("Upload failed: Please select a single file to upload");
+        if (error.code === 'file-invalid-type') {
+          toast.error('File type not supported. Please use PNG, JPG, or WebP.');
+        } else if (error.code === 'file-too-large') {
+          toast.error('File is too large. Maximum size is 10MB.');
+        } else if (error.code === 'too-many-files') {
+          toast.error('Upload failed: Please select a single file to upload');
         } else {
           toast.error(`Upload failed: ${error.message}`);
         }
       }
     },
     accept: {
-      "image/*": [".png", ".jpg", ".jpeg", ".webp"],
+      'image/*': ['.png', '.jpg', '.jpeg', '.webp'],
     },
     maxFiles: 1,
     maxSize: 10 * 1024 * 1024, // 10MB
@@ -117,33 +134,24 @@ export function PhotoUploadCard({
   return (
     <Card
       className={cn(
-        "border-2 border-dashed transition-all duration-300 relative overflow-hidden group",
-        isDragActive
-          ? "border-primary bg-primary/5"
-          : "border-muted-foreground/25",
-        selectedImage
-          ? "border-solid border-border p-0"
-          : "hover:border-primary/50",
+        'border-2 border-dashed transition-all duration-300 relative overflow-hidden group',
+        isDragActive ? 'border-primary bg-primary/5' : 'border-muted-foreground/25',
+        selectedImage ? 'border-solid border-border p-0' : 'hover:border-primary/50',
       )}
     >
       <CardContent className="p-0">
         <div
           {...getRootProps()}
           className={cn(
-            "flex flex-col items-center justify-center min-h-[220px] cursor-pointer p-4 text-center transition-colors",
-            selectedImage ? "cursor-default" : "",
+            'flex flex-col items-center justify-center min-h-[220px] cursor-pointer p-4 text-center transition-colors',
+            selectedImage ? 'cursor-default' : '',
           )}
         >
           <input {...getInputProps()} />
 
           {selectedImage && preview ? (
             <div className="relative w-full h-[220px] flex items-center justify-center">
-              <Image
-                src={preview}
-                alt="Preview"
-                fill
-                className="object-contain"
-              />
+              <Image src={preview} alt="Preview" fill className="object-contain" />
               <div className="absolute top-2 right-2">
                 <button
                   onClick={clearImage}
@@ -160,12 +168,8 @@ export function PhotoUploadCard({
                 <UploadCloud className="h-8 w-8 text-primary" />
               </div>
               <div className="space-y-1">
-                <h3 className="font-semibold text-lg">
-                  Drop image here or click to browse
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  PNG, JPG, WebP up to 10MB
-                </p>
+                <h3 className="font-semibold text-lg">Drop image here or click to browse</h3>
+                <p className="text-sm text-muted-foreground">PNG, JPG, WebP up to 10MB</p>
               </div>
             </div>
           )}

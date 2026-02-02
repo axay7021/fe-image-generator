@@ -1,52 +1,29 @@
-"use server";
+'use server';
 
-import { auth } from "@clerk/nextjs/server";
-import { headers } from "next/headers";
+import apiClient from '@/lib/api-client';
+import { AxiosError } from 'axios';
 
 export async function upscaleImageAction(formData: FormData) {
-  const file = formData.get("file") as File;
-  const targetWidth = formData.get("target_width") as string;
-
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
-  if (!baseUrl) {
-    throw new Error("API Base URL is not configured");
-  }
+  const file = formData.get('file') as File;
+  const targetWidth = formData.get('target_width') as string;
 
   // Get Clerk auth token
-  const { getToken } = await auth();
-  const token = await getToken();
-
-  // Get IP
-  const headersList = await headers();
-  const ip = headersList.get("x-forwarded-for") || "127.0.0.1";
 
   const apiFormData = new FormData();
-  apiFormData.append("file", file);
-  apiFormData.append("target_width", targetWidth);
+  apiFormData.append('file', file);
+  apiFormData.append('target_width', targetWidth);
 
   try {
-    const response = await fetch(`${baseUrl}/upscale`, {
-      method: "POST",
+    const response = await apiClient.post('/upscale', apiFormData, {
       headers: {
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        "X-Forwarded-For": ip,
+        'Content-Type': 'multipart/form-data',
       },
-      body: apiFormData,
+      responseType: 'arraybuffer',
     });
-    if (!response.ok) {
-      const contentType = response.headers.get("content-type");
-      let errorMessage = `Upscale Failed: ${response.status} ${response.statusText}`;
-      if (contentType && contentType.includes("application/json")) {
-        const errorJson = await response.json();
-        if (errorJson.error) errorMessage = errorJson.error;
-      }
-      throw new Error(errorMessage);
-    }
 
-    const arrayBuffer = await response.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-    const mimeType = response.headers.get("content-type") || "image/png";
-    const base64 = buffer.toString("base64");
+    const buffer = Buffer.from(response.data);
+    const mimeType = response.headers['content-type'] || 'image/png';
+    const base64 = buffer.toString('base64');
     const dataUrl = `data:${mimeType};base64,${base64}`;
 
     return {
@@ -54,9 +31,24 @@ export async function upscaleImageAction(formData: FormData) {
       imageUrl: dataUrl,
     };
   } catch (error: unknown) {
-    console.error("Upscale Action Failed:", error);
-    const errorMessage =
-      error instanceof Error ? error.message : "Failed to upscale image";
+    console.error('Upscale Action Failed:', error);
+    let errorMessage = 'Failed to upscale image';
+    if (error instanceof AxiosError) {
+      if (error.response?.data) {
+        try {
+          const decoder = new TextDecoder();
+          const jsonString = decoder.decode(error.response.data);
+          const errorJson = JSON.parse(jsonString);
+          errorMessage = errorJson.error || errorJson.message || errorMessage;
+        } catch {
+          errorMessage = error.message;
+        }
+      } else {
+        errorMessage = error.message;
+      }
+    } else if (error instanceof Error) {
+      errorMessage = error.message;
+    }
     throw new Error(errorMessage);
   }
 }
