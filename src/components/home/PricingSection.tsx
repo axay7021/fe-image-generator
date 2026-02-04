@@ -517,7 +517,7 @@ export function PricingSection() {
                     ) : (
                       <>
                         {/* Desktop Table View */}
-                        <div className="hidden md:block rounded-2xl border overflow-hidden bg-white border-gray-100">
+                        <div className="hidden md:block rounded-2xl border bg-white border-gray-100 max-h-[200px] overflow-y-auto">
                           <Table>
                             <TableHeader className="bg-slate-50 ">
                               <TableRow>
@@ -557,11 +557,11 @@ export function PricingSection() {
                         </div>
 
                         {/* Mobile Card View */}
-                        <div className="md:hidden space-y-4">
+                        <div className="md:hidden space-y-4 max-h-[400px] overflow-y-auto">
                           {billingHistory.map((historyItem) => (
                             <div
                               key={historyItem.id}
-                              className="bg-white rounded-xl border p-4 space-y-3 shadow-sm"
+                              className="bg-white rounded-xl border border-gray-100 p-4 space-y-3 shadow-sm"
                             >
                               <div className="flex justify-between items-start">
                                 <div>

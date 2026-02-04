@@ -13,7 +13,8 @@ import axios from 'axios';
 
 interface CheckoutAPIResponse {
   data?: {
-    url: string;
+    url?: string;
+    payment_page_url?: string;
   };
   message?: string;
   error?: {
@@ -23,16 +24,17 @@ interface CheckoutAPIResponse {
 
 export async function createCheckoutSession(planId: string): Promise<CheckoutResponse> {
   try {
-    const response = await apiClient.post<CheckoutAPIResponse>(`/checkout/${planId}`);
+    const response = await apiClient.post<CheckoutAPIResponse>(`/razorpay/checkout/${planId}`);
 
     console.log({ response });
     const data = response.data;
+    const checkoutUrl = data.data?.url || data.data?.payment_page_url;
 
-    if (response.status >= 200 && response.status < 300 && data.data?.url) {
+    if (response.status >= 200 && response.status < 300 && checkoutUrl) {
       return {
         success: true,
         data: {
-          url: data.data.url,
+          url: checkoutUrl,
         },
         message: data.message,
       };
