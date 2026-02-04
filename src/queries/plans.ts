@@ -72,7 +72,7 @@ export async function fetchPlans(): Promise<PricingPlan[]> {
         if (isFree) {
           priceDisplay = `${plan.image_quota} Image Free`;
         } else {
-          priceDisplay = `$${plan.price_usd} / Month`;
+          priceDisplay = `₹${plan.price_usd}`;
         }
 
         // Merge quotas into features if needed
