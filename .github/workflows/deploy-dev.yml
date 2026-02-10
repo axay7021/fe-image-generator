@@ -1,0 +1,37 @@
+name: Next.js CI/CD for Development Branch [Image Generator]
+
+on:
+  push:
+    branches: ['development']
+
+jobs:
+  build:
+    runs-on: fe-image-generator-dev
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'pnpm'
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Add Envrionemnt Variables
+        run: cp /home/ankit/projects/fe-image-generator-dev/.env .env
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run Lint
+        run: pnpm lint
+
+      - name: Run Build
+        run: pnpm build
+
+      - name: Restart Application with PM2
+        run: pm2 restart fe-image-generator-dev
