@@ -305,31 +305,43 @@ export function PricingSection() {
                   {displayPlans.map((plan) => {
                     // Highlight "Plush" or middle plan as popular if nothing active
                     const isPopular = plan.is_popular;
+                    const isBasicFree = !user && plan.name.toLowerCase().includes('basic');
+                    const isHighlighted = isPopular || isBasicFree;
+
+                    // Determine styling based on highlight type
+                    const highlightColor = isPopular ? 'bg-[#538CE8]' : 'bg-green-500';
+                    const highlightShadow = isPopular
+                      ? 'shadow-[#538CE8]/20'
+                      : 'shadow-green-500/20';
 
                     return (
                       <div
                         key={plan.id}
                         className={cn(
                           'relative w-full rounded-3xl transition-all duration-300 flex flex-col',
-                          isPopular
-                            ? 'shadow-2xl bg-[#538CE8] z-10 pt-10 px-[3px] pb-[3px]'
+                          isHighlighted
+                            ? `shadow-2xl ${highlightColor} z-10 pt-10 px-[3px] pb-[3px]`
                             : 'bg-white shadow-xl border border-blue-200 hover:scale-[1.02] hover:shadow-blue-500/20 p-8 mt-9',
                         )}
                       >
-                        {isPopular && (
+                        {isHighlighted && (
                           <div className="absolute top-0 left-0 right-0 h-10 flex items-center justify-center text-white text-sm font-medium">
-                            Recommended
+                            {isPopular
+                              ? 'Recommended'
+                              : '🎉 First time login user can get basic plan free!'}
                           </div>
                         )}
 
                         <div
                           className={cn(
                             'flex flex-col flex-1',
-                            isPopular
+                            isHighlighted
                               ? 'bg-linear-to-b from-[#FFFFFF] to-[#E5EFFF] p-8 pt-6 rounded-[22px]'
                               : 'bg-white',
                           )}
                         >
+                          {/* Deleted inline Basic Free message as it's now a badge */}
+
                           <div className="mb-8 space-y-4 text-left">
                             <div className="flex items-center justify-between">
                               <h3
@@ -348,7 +360,7 @@ export function PricingSection() {
 
                             <div className="flex items-baseline gap-1">
                               <span className="text-4xl font-bold text-black">
-                                {plan.price.includes('$') ? plan.price.split(' ')[0] : plan.price}
+                                {plan.price.includes('₹') ? plan.price.split(' ')[0] : plan.price}
                               </span>
                             </div>
                             <p className="text-sm text-muted-foreground leading-relaxed h-10">
@@ -390,7 +402,7 @@ export function PricingSection() {
                           </div>
 
                           <div className="space-y-3 mt-auto">
-                            <Button
+                            {/* <Button
                               onClick={() => handleSubscribe(plan)}
                               disabled={isCheckingSubscription || isRedirecting}
                               className={cn(
@@ -408,7 +420,25 @@ export function PricingSection() {
                               ) : (
                                 plan.action
                               )}
-                            </Button>
+                            </Button> */}
+
+                            <a
+                              href={`mailto:kaushik@softcolon.com?subject=Inquiry about ${plan.name}&body=Hi Team,%0D%0A%0D%0AI am interested in the ${plan.name}. Please provide more details about this plan.%0D%0A%0D%0AThanks`}
+                              className="block w-full"
+                            >
+                              <Button
+                                className={cn(
+                                  'w-full h-12 rounded-xl text-lg font-semibold transition-all duration-300 shadow-md',
+                                  isPopular
+                                    ? 'bg-[#538CE8] hover:bg-[#538CE8]/90 text-white shadow-[#538CE8]/20'
+                                    : isBasicFree
+                                      ? 'bg-green-600 hover:bg-green-700 text-white shadow-green-500/20'
+                                      : 'bg-primary hover:opacity-90 text-white shadow-blue-500/20',
+                                )}
+                              >
+                                Contact Sales
+                              </Button>
+                            </a>
                           </div>
                         </div>
                       </div>
@@ -438,6 +468,11 @@ export function PricingSection() {
                             Best Value
                           </div>
                         )}
+                        {!user && plan.name.toLowerCase().includes('basic') && (
+                          <div className="mb-3 bg-green-100/80 text-green-700 text-xs font-semibold px-2 py-1 rounded-lg text-center border border-green-200 w-full">
+                            First time login user can get basic plan free!
+                          </div>
+                        )}
                         <div className="flex items-center gap-4">
                           {/* Radio Indicator */}
                           <div
@@ -456,7 +491,7 @@ export function PricingSection() {
                             <div className="flex justify-between items-center mb-1">
                               <h3 className="font-bold text-gray-900 text-lg">{plan.name}</h3>
                               <span className="font-bold text-lg text-gray-900">
-                                {plan.price.includes('$') ? plan.price.split(' ')[0] : plan.price}
+                                {plan.price.includes('₹') ? plan.price.split(' ')[0] : plan.price}
                               </span>
                             </div>
                             <p className="text-sm text-gray-500 leading-tight">{plan.subtitle}</p>
@@ -469,7 +504,7 @@ export function PricingSection() {
 
                 {/* Mobile Sticky CTA - Now Static at Bottom */}
                 <div className="md:hidden mt-8">
-                  <Button
+                  {/* <Button
                     onClick={() => {
                       const selectedPlan = plans.find((p) => p.id === selectedPlanId);
                       if (selectedPlan) handleSubscribe(selectedPlan);
@@ -485,7 +520,23 @@ export function PricingSection() {
                     ) : (
                       plans.find((p) => p.id === selectedPlanId)?.action || 'Subscribe'
                     )}
-                  </Button>
+                  </Button> */}
+
+                  {selectedPlanId &&
+                    (() => {
+                      const plan = plans.find((p) => p.id === selectedPlanId);
+                      if (!plan) return null;
+                      return (
+                        <a
+                          href={`mailto:kaushik@softcolon.com?subject=Inquiry about ${plan.name}&body=Hi Team,%0D%0A%0D%0AI am interested in the ${plan.name}. Please provide more details about this plan.%0D%0A%0D%0AThanks`}
+                          className="block w-full mt-3"
+                        >
+                          <Button className="w-full h-14 rounded-xl text-lg font-bold bg-[#538CE8] hover:bg-[#538CE8]/90 text-white shadow-lg shadow-blue-500/25">
+                            Contact Sales
+                          </Button>
+                        </a>
+                      );
+                    })()}
                 </div>
               </>
             )}
@@ -537,7 +588,7 @@ export function PricingSection() {
                                     {new Date(historyItem.period_start).toLocaleDateString()}
                                   </TableCell>
                                   <TableCell>{historyItem.plan.name}</TableCell>
-                                  <TableCell>${historyItem.plan.price_usd}</TableCell>
+                                  <TableCell>₹{historyItem.plan.price_usd}</TableCell>
                                   <TableCell>
                                     <span
                                       className={cn(
@@ -589,7 +640,7 @@ export function PricingSection() {
                                 </div>
                                 <div>
                                   <p className="text-sm text-muted-foreground">Amount</p>
-                                  <p className="font-medium">${historyItem.plan.price_usd}</p>
+                                  <p className="font-medium">₹{historyItem.plan.price_usd}</p>
                                 </div>
                               </div>
                             </div>
