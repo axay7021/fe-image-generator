@@ -11,7 +11,7 @@ export async function validateImage(formData: FormData) {
         'Content-Type': 'multipart/form-data',
       },
     });
-
+    console.log({ response });
     return response.data;
   } catch (error: unknown) {
     console.error('Validation error:', error);

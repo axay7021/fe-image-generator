@@ -422,23 +422,23 @@ export function PricingSection() {
                               )}
                             </Button> */}
 
-                            <a
-                              href={`mailto:kaushik@softcolon.com?subject=Inquiry about ${plan.name}&body=Hi Team,%0D%0A%0D%0AI am interested in the ${plan.name}. Please provide more details about this plan.%0D%0A%0D%0AThanks`}
-                              className="block w-full"
+                            <Button
+                              asChild
+                              className={cn(
+                                'w-full h-12 rounded-xl text-lg font-semibold transition-all duration-300 shadow-md',
+                                isPopular
+                                  ? 'bg-[#538CE8] hover:bg-[#538CE8]/90 text-white shadow-[#538CE8]/20'
+                                  : isBasicFree
+                                    ? 'bg-green-600 hover:bg-green-700 text-white shadow-green-500/20'
+                                    : 'bg-primary hover:opacity-90 text-white shadow-blue-500/20',
+                              )}
                             >
-                              <Button
-                                className={cn(
-                                  'w-full h-12 rounded-xl text-lg font-semibold transition-all duration-300 shadow-md',
-                                  isPopular
-                                    ? 'bg-[#538CE8] hover:bg-[#538CE8]/90 text-white shadow-[#538CE8]/20'
-                                    : isBasicFree
-                                      ? 'bg-green-600 hover:bg-green-700 text-white shadow-green-500/20'
-                                      : 'bg-primary hover:opacity-90 text-white shadow-blue-500/20',
-                                )}
+                              <a
+                                href={`mailto:kaushik@softcolon.com?subject=Inquiry%20about%20${plan.name}&body=Hi%20Team,%0D%0A%0D%0AI%20am%20interested%20in%20the%20${plan.name}.%20Please%20provide%20more%20details%20about%20this%20plan.%0D%0A%0D%0AThanks`}
                               >
                                 Contact Sales
-                              </Button>
-                            </a>
+                              </a>
+                            </Button>
                           </div>
                         </div>
                       </div>
@@ -527,14 +527,16 @@ export function PricingSection() {
                       const plan = plans.find((p) => p.id === selectedPlanId);
                       if (!plan) return null;
                       return (
-                        <a
-                          href={`mailto:kaushik@softcolon.com?subject=Inquiry about ${plan.name}&body=Hi Team,%0D%0A%0D%0AI am interested in the ${plan.name}. Please provide more details about this plan.%0D%0A%0D%0AThanks`}
-                          className="block w-full mt-3"
+                        <Button
+                          asChild
+                          className="w-full h-14 rounded-xl text-lg font-bold bg-[#538CE8] hover:bg-[#538CE8]/90 text-white shadow-lg shadow-blue-500/25"
                         >
-                          <Button className="w-full h-14 rounded-xl text-lg font-bold bg-[#538CE8] hover:bg-[#538CE8]/90 text-white shadow-lg shadow-blue-500/25">
+                          <a
+                            href={`mailto:kaushik@softcolon.com?subject=Inquiry about ${plan.name}&body=Hi Team,%0D%0A%0D%0AI am interested in the ${plan.name}. Please provide more details about this plan.%0D%0A%0D%0AThanks`}
+                          >
                             Contact Sales
-                          </Button>
-                        </a>
+                          </a>
+                        </Button>
                       );
                     })()}
                 </div>

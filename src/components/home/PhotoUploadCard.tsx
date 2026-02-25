@@ -54,7 +54,8 @@ export function PhotoUploadCard({ onImageSelect, selectedImage }: PhotoUploadCar
         setPreview(URL.createObjectURL(file));
       } else {
         console.log({ data });
-        toast.error(data.error.message || 'Invalid image');
+        const errorMsg = data?.message;
+        toast.error(errorMsg);
       }
     },
     onError: (error) => {
@@ -81,15 +82,11 @@ export function PhotoUploadCard({ onImageSelect, selectedImage }: PhotoUploadCar
         const toastId = toast.loading('Validating image...');
         try {
           await validate(file, {
-            onSuccess: (data) => {
+            onSuccess: () => {
               toast.dismiss(toastId);
-              if (!data.valid) {
-                toast.error(data.error.message || 'Invalid image');
-              }
             },
             onError: () => {
               toast.dismiss(toastId);
-              toast.error('Validation failed');
             },
           });
         } catch {

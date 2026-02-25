@@ -334,7 +334,7 @@ export default function Home() {
                         size="lg"
                         className="w-full text-lg h-14 bg-[#538CE8] hover:bg-[#538CE8]/80 cursor-pointer shadow-lg shadow-blue-500/25 transition-all hover:scale-[1.02]"
                         onClick={handleGenerate}
-                        disabled={!selectedImage || isPending}
+                        disabled={!selectedImage || isPending || !!resultUrl}
                       >
                         {isPending ? (
                           <span className="flex items-center gap-2">Generating Magic...</span>
@@ -426,7 +426,7 @@ export default function Home() {
                               size="lg"
                               className="w-full text-lg h-14 bg-[#538CE8] hover:bg-[#538CE8]/80 cursor-pointer shadow-lg shadow-blue-500/25 transition-all hover:scale-[1.02]"
                               onClick={handleGenerate}
-                              disabled={!selectedImage || !selectedType || isPending}
+                              disabled={!selectedImage || !selectedType || isPending || !!resultUrl}
                             >
                               {isPending ? (
                                 <span className="flex items-center gap-2">Generating Magic...</span>
