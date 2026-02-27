@@ -107,9 +107,9 @@ export default function LoginPage() {
         toast.error('Login failed. Please check your credentials.');
       }
     } catch (err: unknown) {
-      const error = err as { errors?: { message: string }[] };
+      const error = err as { errors?: { longMessage: string }[] };
       console.error(JSON.stringify(err, null, 2));
-      toast.error(error.errors?.[0]?.message || 'Verification failed');
+      toast.error(error.errors?.[0]?.longMessage || 'Verification failed');
     } finally {
       setIsLoading(false);
     }

@@ -41,7 +41,7 @@ function AnimatedCounter({ value }: { value: number }) {
 export function Header() {
   const { isSignedIn } = useUser();
   const { user, logout, isLoading } = useAuth();
-  const { subscription } = useSubscription();
+  const { subscription, isLoading: isSubscriptionLoading } = useSubscription();
 
   const credits = subscription ? subscription.image_generation_limit - subscription.quota_used : 0;
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -171,14 +171,17 @@ export function Header() {
 
         <div className="flex items-center gap-2 md:gap-4">
           {/* Mobile Menu Toggle */}
-          {isSignedIn && (
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-[#EDEDED] border border-[#EFEFFB] rounded-full text-sm font-medium transition-colors hover:bg-secondary">
-              <Coins className="w-4 h-4 text-yellow-500" />
-              <div className="md:text-lg tabular-nums">
-                <AnimatedCounter value={credits > 0 ? credits : 0} />
+          {isSignedIn &&
+            (isSubscriptionLoading ? (
+              <div className="w-[72px] h-[42px] bg-[#EDEDED] border border-[#EFEFFB] rounded-full animate-pulse" />
+            ) : (
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-[#EDEDED] border border-[#EFEFFB] rounded-full text-sm font-medium transition-colors hover:bg-secondary">
+                <Coins className="w-4 h-4 text-yellow-500" />
+                <div className="md:text-lg tabular-nums">
+                  <AnimatedCounter value={credits > 0 ? credits : 0} />
+                </div>
               </div>
-            </div>
-          )}
+            ))}
 
           <Button variant="ghost" size="icon" className="md:hidden" onClick={toggleMobileMenu}>
             {isMobileMenuOpen ? <X className="h-6! w-6!" /> : <Menu className="h-6! w-6!" />}
