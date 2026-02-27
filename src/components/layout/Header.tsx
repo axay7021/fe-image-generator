@@ -5,17 +5,8 @@ import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { UserButton, useUser } from '@clerk/nextjs';
 import { useAuth } from '@/context/auth-context';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { LogOut, Loader2, Menu, X, Coins } from 'lucide-react';
+import { Menu, X, Coins } from 'lucide-react';
 import { useSubscription } from '@/hooks/use-subscription';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useState, useEffect } from 'react';
 
 import { motion, AnimatePresence, useSpring, useTransform, useMotionValue } from 'framer-motion';
@@ -40,7 +31,7 @@ function AnimatedCounter({ value }: { value: number }) {
 
 export function Header() {
   const { isSignedIn } = useUser();
-  const { user, logout, isLoading } = useAuth();
+  const { user } = useAuth();
   const { subscription, isLoading: isSubscriptionLoading } = useSubscription();
 
   const credits = subscription ? subscription.image_generation_limit - subscription.quota_used : 0;
@@ -189,40 +180,8 @@ export function Header() {
 
           {/* User Auth Buttons (Desktop) */}
           <div className="hidden md:flex items-center gap-4">
-            {isLoading ? (
-              <Button variant="ghost" disabled>
-                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-              </Button>
-            ) : isSignedIn ? (
+            {isSignedIn ? (
               <UserButton afterSignOutUrl="/" />
-            ) : user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                    <Avatar className="h-10 w-10 border border-border">
-                      <AvatarFallback className="bg-primary/10 text-primary font-medium">
-                        {user.full_name?.charAt(0).toUpperCase() || 'U'}
-                      </AvatarFallback>
-                    </Avatar>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end" forceMount>
-                  <DropdownMenuLabel className="font-normal">
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">{user.full_name}</p>
-                      <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
-                    </div>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={logout}
-                    className="text-red-600 focus:text-red-600 focus:bg-red-50"
-                  >
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Log out</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
             ) : (
               <Button
                 asChild
@@ -281,33 +240,13 @@ export function Header() {
 
               {/* Bottom Profile Section */}
               <div className="mt-auto pt-4 border-t border-border">
-                {isLoading ? (
-                  <div className="flex justify-center p-2">
-                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                  </div>
-                ) : isSignedIn ? (
+                {isSignedIn ? (
                   <div className="flex items-center gap-2 p-2 rounded-lg bg-secondary/50">
                     <UserButton afterSignOutUrl="/" />
                     <div className="flex flex-col">
                       <span className="text-sm font-medium">{user?.full_name}</span>
                       <span className="text-sm font-medium">{user?.email}</span>
                     </div>
-                  </div>
-                ) : user ? (
-                  <div className="flex items-center justify-between p-2 rounded-lg bg-secondary/50">
-                    <div className="flex items-center gap-2">
-                      <Avatar className="h-8 w-8">
-                        <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                          {user.full_name?.charAt(0).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="text-sm font-medium truncate max-w-[150px]">
-                        {user.full_name}
-                      </span>
-                    </div>
-                    <Button variant="ghost" size="sm" onClick={logout} className="text-red-500 h-8">
-                      <LogOut className="h-4 w-4" />
-                    </Button>
                   </div>
                 ) : (
                   <Button asChild className="w-full rounded-xl">

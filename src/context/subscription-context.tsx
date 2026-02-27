@@ -45,8 +45,11 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   });
 
   const activePlanId = subscription?.plan?.id || null;
-  const isLoading = isAuthLoading || (!!user && isSubLoading);
-  const isHistoryLoading = isAuthLoading || (!!user && isHistoryApiLoading);
+  // Only show loading if we have a user and subscription data is still loading.
+  // Don't gate on isAuthLoading — if auth never finishes (production Clerk issue),
+  // unauthenticated users should not be blocked by a loader.
+  const isLoading = !!user && isSubLoading;
+  const isHistoryLoading = !!user && isHistoryApiLoading;
 
   const refreshSubscription = async () => {
     await Promise.all([refetchSubscription(), refetchHistory()]);

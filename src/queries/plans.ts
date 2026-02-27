@@ -45,12 +45,12 @@ export async function fetchPlans(): Promise<PricingPlan[]> {
         'ngrok-skip-browser-warning': 'true',
       },
     });
-
+    console.log({ response });
     if (!response.data.success || !response.data.data) {
       return [];
     }
 
-    const apiPlans = response.data.data;
+    const apiPlans = response?.data?.data;
     return apiPlans
       .map((plan) => {
         const isFree = plan.name.toUpperCase().includes('FREE');

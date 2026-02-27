@@ -137,22 +137,15 @@ export function PricingSection() {
     <section id="plans" className="py-18 md:py-24 relative overflow-hidden">
       <div className="container px-4 md:px-6 mx-auto relative z-10">
         <div className="text-center space-y-2 md:mb-8">
-          {isCheckingSubscription ? (
-            <div className="space-y-4 flex flex-col items-center">
-              <Skeleton className="h-12 w-3/4 md:w-1/2 rounded-lg" />
-              <Skeleton className="h-6 w-2/3 md:w-1/3 rounded-lg" />
-            </div>
-          ) : (
-            <>
-              <h2 className="text-2xl md:text-4xl font-bold tracking-tight text-[#538ce8]">
-                {viewMode === 'usage' ? 'Your Plans' : 'Choose Your Perfect Plan'}
-              </h2>
-              <p className="text-base text-muted-foreground max-w-2xl mx-auto md:mb-auto mb-4">
-                Generate professional-grade AI images instantly. Choose a flexible plan that fits
-                your creative workflow and start building today.
-              </p>
-            </>
-          )}
+          <>
+            <h2 className="text-2xl md:text-4xl font-bold tracking-tight text-[#538ce8]">
+              {viewMode === 'usage' ? 'Your Plans' : 'Choose Your Perfect Plan'}
+            </h2>
+            <p className="text-base text-muted-foreground max-w-2xl mx-auto md:mb-auto mb-4">
+              Generate professional-grade AI images instantly. Choose a flexible plan that fits your
+              creative workflow and start building today.
+            </p>
+          </>
         </div>
 
         {/* Top Right Actions */}
@@ -170,7 +163,7 @@ export function PricingSection() {
           </div>
         )}
 
-        {isCheckingSubscription ? (
+        {isCheckingSubscription && viewMode === 'usage' ? (
           <div className="w-full">
             {/* Unified Skeleton (Matches loading.tsx) */}
             <div className="max-w-4xl mx-auto space-y-8 mt-8">
