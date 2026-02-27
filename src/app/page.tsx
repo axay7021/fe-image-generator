@@ -186,6 +186,22 @@ export default function Home() {
     mutate();
   };
 
+  // Determine if the current transformation type requires a prompt to be filled in
+  const isPromptRequired = (): boolean => {
+    if (!selectedType) return false;
+    if (selectedType === 'remove' || selectedType === 'prompt') return true;
+    if (selectedType === 'passport' && passportMode === 'custom') return true;
+    if (selectedType === 'background' && bgCategory === 'custom') return true;
+    return false;
+  };
+
+  const isGenerateDisabled =
+    !selectedImage ||
+    !selectedType ||
+    isPending ||
+    !!resultUrl ||
+    (isPromptRequired() && !currentPrompt.trim());
+
   const showResults = !!resultUrl || isPending;
 
   // Scroll to results on mobile when generation starts
@@ -334,7 +350,7 @@ export default function Home() {
                         size="lg"
                         className="w-full text-lg h-14 bg-[#538CE8] hover:bg-[#538CE8]/80 cursor-pointer shadow-lg shadow-blue-500/25 transition-all hover:scale-[1.02]"
                         onClick={handleGenerate}
-                        disabled={!selectedImage || isPending || !!resultUrl}
+                        disabled={isGenerateDisabled}
                       >
                         {isPending ? (
                           <span className="flex items-center gap-2">Generating Magic...</span>
@@ -426,7 +442,7 @@ export default function Home() {
                               size="lg"
                               className="w-full text-lg h-14 bg-[#538CE8] hover:bg-[#538CE8]/80 cursor-pointer shadow-lg shadow-blue-500/25 transition-all hover:scale-[1.02]"
                               onClick={handleGenerate}
-                              disabled={!selectedImage || !selectedType || isPending || !!resultUrl}
+                              disabled={isGenerateDisabled}
                             >
                               {isPending ? (
                                 <span className="flex items-center gap-2">Generating Magic...</span>
