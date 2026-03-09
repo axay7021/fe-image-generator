@@ -49,13 +49,13 @@ export const LINKEDIN_STYLES = [
   {
     id: 'studio_look',
     label: 'High-End Studio Look',
-    img: '/linkedin/7.png',
+    img: '/linkedin/8.png',
     isPremium: true,
   },
   {
     id: 'outdoor_natural',
     label: 'Outdoor / Nature',
-    img: '/linkedin/8.png',
+    img: '/linkedin/7.png',
     isPremium: true,
   },
   {
