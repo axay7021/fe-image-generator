@@ -11,7 +11,8 @@
     "lint:fix": "eslint --fix",
     "prettier": "prettier --write \"src/**/*.{js,jsx,ts,tsx}\"",
     "prettier:fix": "pnpm prettier --write",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "demo": "node scripts/serve-portfolio.mjs"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.36.7",

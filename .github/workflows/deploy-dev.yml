@@ -1,8 +1,7 @@
 name: Next.js CI/CD for Development Branch [Image Generator]
 
 on:
-  push:
-    branches: ['development']
+  workflow_dispatch:
 
 jobs:
   build:

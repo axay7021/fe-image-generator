@@ -1,36 +1,29 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI Image Generator — Frontend
 
-## Getting Started
+Next.js interface for photo transformations, paired with the [FastAPI backend](https://github.com/axay7021/be-image-generator).
 
-First, run the development server:
+## Portfolio walkthrough
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```sh
+node scripts/serve-portfolio.mjs
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://127.0.0.1:4175`. No installation, login, or API key is needed for the walkthrough. Explore preset visual assets, a comparison slider, and the frontend-to-backend workflow. The assets are illustrative examples from the source project, **not a before-and-after result or live generation**. The static files in `public/portfolio` can also be hosted directly.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+![Portfolio walkthrough](docs/portfolio-preview.png)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Full application
 
-## Learn More
+Use Node.js 20+ and the pnpm version declared in `package.json`.
 
-To learn more about Next.js, take a look at the following resources:
+```sh
+pnpm install
+cp .env.example .env
+pnpm dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Configure Clerk and `NEXT_PUBLIC_BASE_URL` for your running backend. Live image operations require the backend, PostgreSQL, authentication and the relevant AI provider credentials. Billing features also require their configured provider.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The application includes photo uploads, transformation selection, result presentation, authentication and subscription flows. Showcase both repositories together as **AI Image Generator**.
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Deployment workflows are manual and require your own runner setup.
