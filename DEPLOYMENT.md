@@ -29,3 +29,16 @@ The cloud network could not directly fetch the Render origin (proxy CONNECT time
 Personal workspace access was approved on 30 October 2026. Project `ai-image-generator` is created in team_VifP2fo09snOry74VZ0VlNYH. Git import currently requires Vercel GitHub integration installation, so the deployment uses a pinned public source snapshot fetched in the build step. Automatic Git deployments are not enabled yet.
 
 The root layout shows an explicit setup-pending page when Clerk public or secret configuration is absent. This allows a truthful hosted application instead of a build failure. It never supplies fake Clerk credentials and does not claim image generation is operational. Once real Clerk credentials are set in Vercel, rebuild to render the full existing application.
+
+## Hosting update — 30 October 2026
+
+Vercel personal workspace access is approved. The project is created under team_VifP2fo09snOry74VZ0VlNYH. Earlier 403/access-grant notes above are historical and no longer the blocker.
+
+Public production frontend: https://ai-image-generator-dun-chi.vercel.app
+Vercel project ID: prj_rsVL4EfzfYHP0iUMV4GdFXLQiOqU
+
+This is a real application deployment, with explicit unavailable/configuration-pending states where required services are missing. It does not imply that AI, authentication, storage or billing integrations are operational. Provider keys remain empty intentionally.
+
+Vercel GitHub integration was unavailable for repository import. The current deployment uses a direct source wrapper that downloads an immutable public GitHub commit before installation/build. Private .env files are excluded. Automatic Git deployments remain TODO; install the Vercel GitHub integration and link this repository to enable them. Use pinned pnpm versions for both install and build, because Vercel's fallback pnpm version can be too old for these manifests.
+
+The custom frontend domain is attached in Vercel but its Name.com DNS records have not been applied. Domain ownership verification is not proof that DNS routing or TLS is ready. Preserve existing portfolio and email records. See the task-level DNS_RECORDS.md for the returned per-project CNAME targets.
