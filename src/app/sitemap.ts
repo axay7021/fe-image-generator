@@ -2,7 +2,7 @@ import { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl =
-    process.env.NEXT_PUBLIC_APP_URL || "https://dev.profilepiclabs.com";
+    process.env.NEXT_PUBLIC_APP_URL || "https://images.akshaydobariya.dev";
 
   return [
     {

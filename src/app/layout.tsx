@@ -19,7 +19,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://dev.profilepiclabs.com"),
+  metadataBase: new URL("https://images.akshaydobariya.dev"),
   title: "ProfilePic Labs",
   description: "Transform your photos with AI",
   keywords: [
@@ -49,7 +49,7 @@ export const metadata: Metadata = {
     siteName: "ProfilePic Labs",
     images: [
       {
-        url: "https://dev.profilepiclabs.com/og-image.png",
+        url: "https://images.akshaydobariya.dev/og-image.png",
         width: 1200,
         height: 630,
         alt: "ProfilePic Labs",
