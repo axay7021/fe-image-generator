@@ -23,3 +23,9 @@ Vercel project creation returned 403: the existing connection needs scope consen
 - [ ] Update the portfolio case study with the actual frontend URL only after deployment and verification.
 
 The cloud network could not directly fetch the Render origin (proxy CONNECT timeout); Render's terminal deploy status and application startup logs are verified, but external HTTP and full end-to-end checks remain pending.
+
+## Vercel access and source deployment update
+
+Personal workspace access was approved on 30 October 2026. Project `ai-image-generator` is created in team_VifP2fo09snOry74VZ0VlNYH. Git import currently requires Vercel GitHub integration installation, so the deployment uses a pinned public source snapshot fetched in the build step. Automatic Git deployments are not enabled yet.
+
+The root layout shows an explicit setup-pending page when Clerk public or secret configuration is absent. This allows a truthful hosted application instead of a build failure. It never supplies fake Clerk credentials and does not claim image generation is operational. Once real Clerk credentials are set in Vercel, rebuild to render the full existing application.

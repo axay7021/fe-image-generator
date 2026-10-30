@@ -88,6 +88,25 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  if (!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || !process.env.CLERK_SECRET_KEY) {
+    return (
+      <html lang="en">
+        <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-[#f5f3ed] text-[#21332e]`}>
+          <main className="mx-auto flex min-h-screen max-w-3xl flex-col justify-center gap-6 px-6 py-16">
+            <p className="text-sm uppercase tracking-widest">AI Image Generator</p>
+            <h1 className="text-4xl font-semibold leading-tight sm:text-6xl">The application is hosted.<br />Sign-in setup is pending.</h1>
+            <p className="max-w-xl text-lg leading-relaxed">Image uploads and generation will become available once the owner finishes authentication and AI service configuration.</p>
+            <p role="status" className="rounded-xl border border-[#cbd5c7] bg-white p-5">Live image generation is currently unavailable. No sample output is presented as a generated result.</p>
+            <div className="flex flex-wrap gap-5">
+              <a className="underline" href="https://www.akshaydobariya.dev/projects/ai-image-generator">Project overview</a>
+              <a className="underline" href="https://github.com/axay7021/fe-image-generator">Frontend source</a>
+              <a className="underline" href="https://github.com/axay7021/be-image-generator">Backend source</a>
+            </div>
+          </main>
+        </body>
+      </html>
+    );
+  }
   return (
     <ClerkProvider>
       <html lang="en">
