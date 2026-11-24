@@ -274,7 +274,8 @@ export function StudioPreview({ ready = true }: { ready?: boolean }) {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState('');
   const [resultUrl, setResultUrl] = useState<string | null>(null);
-  const [viewOriginal, setViewOriginal] = useState(false);
+  const [activeCanvasView, setActiveCanvasView] = useState<'photo' | 'target'>('photo');
+  const [resultView, setResultView] = useState<'result' | 'original'>('result');
 
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState('');
@@ -314,7 +315,8 @@ export function StudioPreview({ ready = true }: { ready?: boolean }) {
     }
     setError('');
     setResultUrl(null);
-    setViewOriginal(false);
+    setActiveCanvasView('photo');
+    setResultView('result');
     setFile(value);
     setPreview(URL.createObjectURL(value));
   }
@@ -350,7 +352,7 @@ export function StudioPreview({ ready = true }: { ready?: boolean }) {
 
       if (res.success && res.imageUrl) {
         setResultUrl(res.imageUrl);
-        setViewOriginal(false);
+        setResultView('result');
       } else {
         setError(res.error || 'Failed to generate image. Please try again.');
       }
@@ -531,12 +533,14 @@ export function StudioPreview({ ready = true }: { ready?: boolean }) {
               <span>
                 <span className={styles.liveDot} />{' '}
                 {resultUrl
-                  ? viewOriginal
-                    ? 'ORIGINAL PHOTO'
-                    : 'AI GENERATED RESULT'
+                  ? resultView === 'result'
+                    ? 'AI GENERATED RESULT'
+                    : 'ORIGINAL PHOTO'
                   : file
-                    ? 'YOUR PHOTO (FULL VIEW)'
-                    : 'STYLE PREVIEW EXAMPLE'}
+                    ? activeCanvasView === 'target'
+                      ? `EXAMPLE TARGET: ${selectedPreset?.title?.toUpperCase()}`
+                      : 'YOUR PHOTO (FULL VIEW)'
+                    : `STYLE PREVIEW: ${selectedPreset?.title?.toUpperCase()}`}
               </span>
               <span>
                 <SlidersHorizontal size={14} aria-hidden="true" />{' '}
@@ -549,8 +553,8 @@ export function StudioPreview({ ready = true }: { ready?: boolean }) {
               <div className={styles.photoFrame}>
                 {resultUrl ? (
                   <Image
-                    src={viewOriginal ? preview : resultUrl}
-                    alt={viewOriginal ? 'Original uploaded photo' : 'AI generated result'}
+                    src={resultView === 'result' ? resultUrl : preview}
+                    alt={resultView === 'result' ? 'AI generated result' : 'Original uploaded photo'}
                     fill
                     unoptimized
                     sizes="(max-width: 760px) 90vw, 520px"
@@ -559,10 +563,18 @@ export function StudioPreview({ ready = true }: { ready?: boolean }) {
                   />
                 ) : (
                   <Image
-                    src={preview || selectedPreset?.image || '/portfolio/sample-1.jpg'}
+                    src={
+                      file
+                        ? activeCanvasView === 'target'
+                          ? (selectedPreset?.image || '/portfolio/sample-1.jpg')
+                          : preview
+                        : selectedPreset?.image || '/portfolio/sample-1.jpg'
+                    }
                     alt={
                       file
-                        ? 'Your uploaded photo, shown full without cropping'
+                        ? activeCanvasView === 'target'
+                          ? `Example target: ${selectedPreset?.title}`
+                          : 'Your uploaded photo, shown full without cropping'
                         : selectedPreset?.title || 'Example portrait'
                     }
                     fill
@@ -575,12 +587,14 @@ export function StudioPreview({ ready = true }: { ready?: boolean }) {
 
                 <span className={styles.photoBadge}>
                   {resultUrl
-                    ? viewOriginal
-                      ? 'Original upload'
-                      : `AI generated · ${selectedPreset?.title}`
+                    ? resultView === 'result'
+                      ? `AI generated · ${selectedPreset?.title}`
+                      : 'Original upload'
                     : file
-                      ? 'Your photo · full version'
-                      : `Example: ${selectedPreset?.title}`}
+                      ? activeCanvasView === 'target'
+                        ? `Target example · ${selectedPreset?.title}`
+                        : 'Your photo · full version'
+                      : `Example · ${selectedPreset?.title}`}
                 </span>
               </div>
 
@@ -590,17 +604,17 @@ export function StudioPreview({ ready = true }: { ready?: boolean }) {
                   <div className={styles.compare} role="group" aria-label="Result comparison">
                     <button
                       type="button"
-                      className={viewOriginal ? styles.compareActive : ''}
-                      onClick={() => setViewOriginal(true)}
+                      className={resultView === 'result' ? styles.compareActive : ''}
+                      onClick={() => setResultView('result')}
                     >
-                      Original
+                      AI Result
                     </button>
                     <button
                       type="button"
-                      className={!viewOriginal ? styles.compareActive : ''}
-                      onClick={() => setViewOriginal(false)}
+                      className={resultView === 'original' ? styles.compareActive : ''}
+                      onClick={() => setResultView('original')}
                     >
-                      AI Result
+                      Original
                     </button>
                   </div>
                   <a
@@ -615,16 +629,16 @@ export function StudioPreview({ ready = true }: { ready?: boolean }) {
                 <div className={styles.compare} role="group" aria-label="Preview view">
                   <button
                     type="button"
-                    className={!file || !viewOriginal ? styles.compareActive : ''}
-                    onClick={() => setViewOriginal(false)}
+                    className={!file || activeCanvasView === 'photo' ? styles.compareActive : ''}
+                    onClick={() => setActiveCanvasView('photo')}
                   >
-                    {file ? 'Your Photo' : 'Example Style'}
+                    Your Photo
                   </button>
                   {file && (
                     <button
                       type="button"
-                      className={viewOriginal ? styles.compareActive : ''}
-                      onClick={() => setViewOriginal(true)}
+                      className={activeCanvasView === 'target' ? styles.compareActive : ''}
+                      onClick={() => setActiveCanvasView('target')}
                     >
                       Example Target
                     </button>
