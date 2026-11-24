@@ -358,7 +358,12 @@ export function StudioPreview({ ready = true }: { ready?: boolean }) {
       }
     } catch (err: unknown) {
       console.error('Generation error:', err);
-      setError(err instanceof Error ? err.message : 'An error occurred during generation.');
+      const msg = err instanceof Error ? err.message : 'An error occurred during generation.';
+      if (msg.includes('unexpected response') || msg.includes('server')) {
+        setError('The generation service is temporarily at its daily AI quota limit or timed out. Please try again later or add billing credits.');
+      } else {
+        setError(msg);
+      }
     } finally {
       setIsGenerating(false);
     }

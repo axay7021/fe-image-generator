@@ -8,6 +8,7 @@ const apiClient = axios.create({
     'Content-Type': 'application/json',
     'ngrok-skip-browser-warning': 'true',
   },
+  timeout: 60000,
 });
 
 // Request Interceptor
