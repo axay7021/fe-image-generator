@@ -13,11 +13,16 @@ const apiClient = axios.create({
 // Request Interceptor
 apiClient.interceptors.request.use(
   async (config) => {
-    // You can attach tokens here if needed
-    const { getToken } = await auth();
-    const token = await getToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    try {
+      if (process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && process.env.CLERK_SECRET_KEY) {
+        const { getToken } = await auth();
+        const token = await getToken();
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+      }
+    } catch {
+      // Anonymous or unconfigured auth
     }
 
     try {

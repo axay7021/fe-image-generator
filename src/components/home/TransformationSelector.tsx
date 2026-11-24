@@ -3,7 +3,9 @@
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
+import type { PromptPreset } from '@/lib/prompt-presets';
 import Image from 'next/image';
+import { PromptPresetGallery } from './PromptPresetGallery';
 
 export type TransformationType = 'passport' | 'linkedin' | 'background' | 'remove' | 'prompt';
 
@@ -99,6 +101,7 @@ export const BACKGROUND_CATEGORIES = [
 interface TransformationSelectorProps {
   selectedType: TransformationType | null;
   onSelect: (type: TransformationType) => void;
+  onPresetSelect: (preset: PromptPreset) => void;
 }
 
 const options: {
@@ -139,7 +142,11 @@ const options: {
   },
 ];
 
-export function TransformationSelector({ selectedType, onSelect }: TransformationSelectorProps) {
+export function TransformationSelector({
+  selectedType,
+  onSelect,
+  onPresetSelect,
+}: TransformationSelectorProps) {
   return (
     <div className="space-y-6">
       <div>
@@ -179,6 +186,8 @@ export function TransformationSelector({ selectedType, onSelect }: Transformatio
           })}
         </RadioGroup>
       </div>
+
+      <PromptPresetGallery selectedType={selectedType} onSelect={onPresetSelect} />
     </div>
   );
 }

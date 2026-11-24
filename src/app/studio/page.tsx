@@ -26,6 +26,7 @@ import { FAQSection } from '@/components/home/FAQ';
 import { toast } from 'react-hot-toast';
 import { useSubscription } from '@/hooks/use-subscription';
 import { usePersistentGenerationState } from '@/hooks/use-persistent-state';
+import type { PromptPreset } from '@/lib/prompt-presets';
 
 export default function Home() {
   const router = useRouter();
@@ -94,6 +95,20 @@ export default function Home() {
   };
 
   // const { isSignedIn } = useUser(); // Removed duplicate declaration
+
+  const handlePresetSelect = (preset: PromptPreset) => {
+    setSelectedType(preset.transformationType);
+    setPrompts((previous) => ({
+      ...previous,
+      [preset.transformationType]: preset.prompt,
+    }));
+
+    if (preset.passportMode) setPassportMode(preset.passportMode);
+    if (preset.backgroundCategory) setBgCategory(preset.backgroundCategory);
+
+    setResultUrl(null);
+    setStep(3);
+  };
 
   const { refreshSubscription } = useSubscription();
 
@@ -345,6 +360,7 @@ export default function Home() {
                           setSelectedType(type);
                           setStep(3);
                         }}
+                        onPresetSelect={handlePresetSelect}
                       />
                       <Button
                         size="lg"
@@ -408,6 +424,7 @@ export default function Home() {
                                 setSelectedType(type);
                                 setStep(3);
                               }}
+                              onPresetSelect={handlePresetSelect}
                             />
                           </motion.div>
                         )}
