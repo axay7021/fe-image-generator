@@ -321,6 +321,65 @@ export function StudioPreview({ ready = true }: { ready?: boolean }) {
     setPreview(URL.createObjectURL(value));
   }
 
+  async function prepareImageForUpload(fileToPrepare: File): Promise<File> {
+    if (typeof window === 'undefined') return fileToPrepare;
+    // If under 2 MB and already JPEG, no need to re-encode
+    if (fileToPrepare.size <= 2 * 1024 * 1024 && fileToPrepare.type === 'image/jpeg') {
+      return fileToPrepare;
+    }
+
+    return new Promise((resolve) => {
+      const img = new window.Image();
+      const objectUrl = URL.createObjectURL(fileToPrepare);
+      img.onload = () => {
+        URL.revokeObjectURL(objectUrl);
+        const MAX_DIM = 1920;
+        let { width, height } = img;
+
+        if (width > MAX_DIM || height > MAX_DIM) {
+          if (width > height) {
+            height = Math.round((height * MAX_DIM) / width);
+            width = MAX_DIM;
+          } else {
+            width = Math.round((width * MAX_DIM) / height);
+            height = MAX_DIM;
+          }
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          resolve(fileToPrepare);
+          return;
+        }
+
+        ctx.drawImage(img, 0, 0, width, height);
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              resolve(fileToPrepare);
+              return;
+            }
+            const optimized = new File([blob], fileToPrepare.name.replace(/\.[^.]+$/, '.jpg'), {
+              type: 'image/jpeg',
+              lastModified: Date.now(),
+            });
+            resolve(optimized);
+          },
+          'image/jpeg',
+          0.88,
+        );
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        resolve(fileToPrepare);
+      };
+      img.src = objectUrl;
+    });
+  }
+
   async function handleGenerate() {
     if (!file) {
       setError('Please upload your photo first using the button below the canvas.');
@@ -331,8 +390,9 @@ export function StudioPreview({ ready = true }: { ready?: boolean }) {
     setIsGenerating(true);
 
     try {
+      const uploadableFile = await prepareImageForUpload(file);
       const formData = new FormData();
-      formData.append('image', file);
+      formData.append('image', uploadableFile);
       formData.append('type', selectedPreset.type);
       formData.append('prompt', promptText);
 

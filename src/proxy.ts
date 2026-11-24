@@ -8,13 +8,7 @@ const hasAuthenticationConfiguration = Boolean(
 
 export default hasAuthenticationConfiguration
   ? clerkMiddleware()
-  : function setupPending(request: NextRequest) {
-      if (request.method !== "GET" && request.method !== "HEAD") {
-        return NextResponse.json(
-          { error: "Authentication service is not configured yet.", code: "AUTH_NOT_CONFIGURED" },
-          { status: 503 },
-        );
-      }
+  : function setupPending(_request: NextRequest) {
       return NextResponse.next();
     };
 
